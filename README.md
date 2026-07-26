@@ -14,12 +14,14 @@ Fresh CodeIgniter 3 ecommerce scaffold with HMVC-style modules.
 
 Create the database and tables from `database/schema.sql`.
 
-Configured connection:
+Copy `.env.example` to `.env`, then adjust the values for your machine.
 
-- Database: `kupiana`
-- Username: `root`
-- Password: empty
-- Host: `localhost`
+Default local connection values:
+
+- `DB_DATABASE=kupiana`
+- `DB_USERNAME=root`
+- `DB_PASSWORD=`
+- `DB_HOST=localhost`
 
 Seed accounts:
 

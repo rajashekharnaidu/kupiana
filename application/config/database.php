@@ -73,20 +73,63 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
+if (!function_exists('kupiana_env')) {
+	function kupiana_env($key, $default = NULL)
+	{
+		static $env = NULL;
+
+		if ($env === NULL) {
+			$env = array();
+			$env_file = FCPATH.'.env';
+
+			if (is_file($env_file) && is_readable($env_file)) {
+				foreach (file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+					$line = trim($line);
+
+					if ($line === '' || strpos($line, '#') === 0 || strpos($line, '=') === FALSE) {
+						continue;
+					}
+
+					list($name, $value) = explode('=', $line, 2);
+					$name = trim($name);
+					$value = trim($value);
+
+					if (
+						(strlen($value) >= 2)
+						&& (($value[0] === '"' && substr($value, -1) === '"') || ($value[0] === "'" && substr($value, -1) === "'"))
+					) {
+						$value = substr($value, 1, -1);
+					}
+
+					$env[$name] = $value;
+				}
+			}
+		}
+
+		$value = getenv($key);
+
+		if ($value !== FALSE) {
+			return $value;
+		}
+
+		return array_key_exists($key, $env) ? $env[$key] : $default;
+	}
+}
+
 $db['default'] = array(
-	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'root',
-	'password' => '',
-	'database' => 'kupiana',
-	'dbdriver' => 'mysqli',
-	'dbprefix' => '',
+	'dsn'	=> kupiana_env('DB_DSN', ''),
+	'hostname' => kupiana_env('DB_HOST', 'localhost'),
+	'username' => kupiana_env('DB_USERNAME', 'root'),
+	'password' => kupiana_env('DB_PASSWORD', ''),
+	'database' => kupiana_env('DB_DATABASE', 'kupiana'),
+	'dbdriver' => kupiana_env('DB_DRIVER', 'mysqli'),
+	'dbprefix' => kupiana_env('DB_PREFIX', ''),
 	'pconnect' => FALSE,
 	'db_debug' => (ENVIRONMENT !== 'production'),
 	'cache_on' => FALSE,
 	'cachedir' => '',
-	'char_set' => 'utf8mb4',
-	'dbcollat' => 'utf8mb4_unicode_ci',
+	'char_set' => kupiana_env('DB_CHARSET', 'utf8mb4'),
+	'dbcollat' => kupiana_env('DB_COLLATION', 'utf8mb4_unicode_ci'),
 	'swap_pre' => '',
 	'encrypt' => FALSE,
 	'compress' => FALSE,
