@@ -141,8 +141,24 @@ $config['subclass_prefix'] = 'MY_';
 */
 $config['composer_autoload'] = FALSE;
 
+/*
+|--------------------------------------------------------------------------
+| HMVC Module Locations
+|--------------------------------------------------------------------------
+|
+| The installed HMVC package (Jens Segers — application/third_party/HMVC)
+| expects a plain LIST of absolute paths; its Router constructor runs each
+| entry through realpath().
+|
+| Do NOT use the wiredesignz "Modular Extensions" format
+| (array(APPPATH.'modules/' => '../modules/')). The router would take the
+| relative VALUE, realpath('../modules/') returns FALSE, and every module
+| path collapses to '/' — making every module route return 404.
+|
+| This must stay in sync with application/config/modules.php.
+*/
 $config['modules_locations'] = array(
-	APPPATH.'modules/' => '../modules/',
+	APPPATH.'modules/',
 );
 
 /*
@@ -230,7 +246,13 @@ $config['allow_get_array'] = TRUE;
 | your log files will fill up very fast.
 |
 */
-$config['log_threshold'] = 1;
+/*
+| In development we log at INFO so the Mailer's "not sent" fallback actually
+| writes verification and reset links to application/logs — otherwise there is
+| no way to complete those flows without live ZeptoMail credentials.
+| Production stays at ERROR only.
+*/
+$config['log_threshold'] = (ENVIRONMENT === 'development') ? 3 : 1;
 
 /*
 |--------------------------------------------------------------------------

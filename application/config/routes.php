@@ -50,8 +50,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |		my-controller/my-method	-> my_controller/my_method
 */
 $route['default_controller'] = 'home';
-$route['login'] = 'auth/login';
-$route['logout'] = 'auth/logout';
+
+/* Authentication (Phase 3) --------------------------------------------- */
+$route['login']               = 'auth/login';
+$route['login/otp']           = 'auth/otp';
+$route['logout']              = 'auth/logout';
+$route['register']            = 'auth/register';
+$route['verify-email']        = 'auth/verify_email';
+$route['resend-verification'] = 'auth/resend_verification';
+$route['forgot-password']     = 'auth/forgot_password';
+$route['reset-password']      = 'auth/reset_password';
 $route['admin'] = 'admin/dashboard';
 $route['account'] = 'user/dashboard';
 $route['products/(:any)'] = 'catalog/products/detail/$1';

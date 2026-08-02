@@ -83,3 +83,26 @@ defined('EXIT_USER_INPUT')     OR define('EXIT_USER_INPUT', 7); // invalid user 
 defined('EXIT_DATABASE')       OR define('EXIT_DATABASE', 8); // database error
 defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
+
+/*
+|--------------------------------------------------------------------------
+| Application Timezone
+|--------------------------------------------------------------------------
+|
+| Set here, in constants.php, because CodeIgniter loads this file before any
+| controller, model or library runs — so every date() call in the request
+| shares one timezone.
+|
+| This matters more than it looks. PHP falls back to whatever php.ini says
+| (Europe/Berlin on this machine), while MySQL's NOW() follows the system
+| clock. Left alone the two disagree, and rows written by PHP date() end up
+| hours apart from rows written by SQL NOW() — quietly corrupting token
+| expiry windows, throttle counters and report date ranges.
+|
+| Keep this in sync with $config['timezone'] in config/app.php, which reads
+| the same constant.
+|
+*/
+defined('APP_TIMEZONE') OR define('APP_TIMEZONE', 'Asia/Kolkata');
+
+date_default_timezone_set(APP_TIMEZONE);

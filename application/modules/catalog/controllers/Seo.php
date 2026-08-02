@@ -18,7 +18,8 @@ class Seo extends MY_Controller
 
 		$categories = $this->db
 			->select('slug, updated_at')
-			->where('is_active', 1)
+			->where('status', 'active')
+			->where('deleted_at IS NULL', NULL, FALSE)
 			->get('categories')
 			->result();
 
@@ -33,6 +34,7 @@ class Seo extends MY_Controller
 		$products = $this->db
 			->select('slug, updated_at')
 			->where('status', 'active')
+			->where('deleted_at IS NULL', NULL, FALSE)
 			->get('products')
 			->result();
 

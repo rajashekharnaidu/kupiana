@@ -7,6 +7,11 @@ application/cache/*
 application/logs/*
 !application/logs/index.html
 
+# Keep the upload directory structure, ignore uploaded content.
+public/uploads/**/*
+!public/uploads/**/index.html
+!public/uploads/.htaccess
+
 !application/*/.htaccess
 
 composer.lock

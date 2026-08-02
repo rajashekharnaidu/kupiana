@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Catalog extends MY_Controller
+class Catalog extends Store_Controller
 {
 	public function index()
 	{

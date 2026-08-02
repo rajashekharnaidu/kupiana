@@ -9,7 +9,7 @@ function seo_meta($meta = array())
 		'canonical' => current_url(),
 		'robots' => 'index,follow',
 		'og_type' => 'website',
-		'og_image' => base_url('public/assets/images/og-default.jpg'),
+		'og_image' => base_url('public/assets/images/placeholder.svg'),
 	);
 
 	return array_merge($defaults, $meta);

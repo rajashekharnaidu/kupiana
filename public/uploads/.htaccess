@@ -1,0 +1,7 @@
+# Uploaded files are user-supplied: serve them, never execute them.
+<FilesMatch "\.(php|php[0-9]|phtml|phar|pl|py|cgi|sh|htaccess)$">
+	Require all denied
+</FilesMatch>
+php_flag engine off
+Options -ExecCGI -Indexes
+AddType text/plain .php .phtml .phar
