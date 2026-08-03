@@ -1,6 +1,64 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+if (!function_exists('kupiana_env')) {
+	function kupiana_env($key, $default = NULL)
+	{
+		static $env = NULL;
+
+		if ($env === NULL) {
+			$env = array();
+			$env_file = FCPATH.'.env';
+
+			if (is_file($env_file) && is_readable($env_file)) {
+				foreach (file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+					$line = trim($line);
+
+					if ($line === '' || strpos($line, '#') === 0 || strpos($line, '=') === FALSE) {
+						continue;
+					}
+
+					list($name, $value) = explode('=', $line, 2);
+					$name = trim($name);
+					$value = trim($value);
+
+					if (
+						(strlen($value) >= 2)
+						&& (($value[0] === '"' && substr($value, -1) === '"') || ($value[0] === "'" && substr($value, -1) === "'"))
+					) {
+						$value = substr($value, 1, -1);
+					}
+
+					$env[$name] = $value;
+				}
+			}
+		}
+
+		$value = getenv($key);
+
+		if ($value !== FALSE) {
+			return $value;
+		}
+
+		return array_key_exists($key, $env) ? $env[$key] : $default;
+	}
+}
+
+if (!function_exists('kupiana_env_bool')) {
+	function kupiana_env_bool($key, $default = FALSE)
+	{
+		$value = kupiana_env($key, NULL);
+
+		if ($value === NULL || $value === '') {
+			return (bool) $default;
+		}
+
+		$parsed = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+		return $parsed === NULL ? (bool) $default : (bool) $parsed;
+	}
+}
+
 /*
 |--------------------------------------------------------------------------
 | Base Site URL
@@ -23,8 +81,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http')
-	.'://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost').'/';
+$base_url = rtrim((string) kupiana_env('APP_BASE_URL', ''), '/');
+$config['base_url'] = $base_url !== ''
+	? $base_url.'/'
+	: (((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http')
+		.'://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost').'/');
 
 /*
 |--------------------------------------------------------------------------
@@ -353,7 +414,7 @@ $config['cache_query_string'] = FALSE;
 | https://codeigniter.com/userguide3/libraries/encryption.html
 |
 */
-$config['encryption_key'] = 'kupiana-change-this-key-before-production';
+$config['encryption_key'] = kupiana_env('APP_ENCRYPTION_KEY', 'kupiana-change-this-key-before-production');
 
 /*
 |--------------------------------------------------------------------------
@@ -414,7 +475,10 @@ $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'kupiana_session';
 $config['sess_samesite'] = 'Lax';
 $config['sess_expiration'] = 7200;
-$config['sess_save_path'] = APPPATH.'cache/sessions';
+$sess_save_path = kupiana_env('SESSION_SAVE_PATH', APPPATH.'cache/sessions');
+$config['sess_save_path'] = ($sess_save_path !== '' && $sess_save_path[0] !== '/')
+	? FCPATH.$sess_save_path
+	: $sess_save_path;
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 300;
 $config['sess_regenerate_destroy'] = TRUE;
@@ -436,11 +500,11 @@ $config['sess_regenerate_destroy'] = TRUE;
 |
 */
 $config['cookie_prefix']	= '';
-$config['cookie_domain']	= '';
+$config['cookie_domain']	= kupiana_env('COOKIE_DOMAIN', '');
 $config['cookie_path']		= '/';
-$config['cookie_secure']	= FALSE;
+$config['cookie_secure']	= kupiana_env_bool('COOKIE_SECURE', ENVIRONMENT === 'production');
 $config['cookie_httponly'] 	= TRUE;
-$config['cookie_samesite'] 	= 'Lax';
+$config['cookie_samesite'] 	= kupiana_env('COOKIE_SAMESITE', 'Lax');
 
 /*
 |--------------------------------------------------------------------------
@@ -489,7 +553,7 @@ $config['csrf_token_name'] = 'kupiana_csrf_token';
 $config['csrf_cookie_name'] = 'kupiana_csrf_cookie';
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = TRUE;
-$config['csrf_exclude_uris'] = array();
+$config['csrf_exclude_uris'] = array('payments/razorpay/webhook', 'tracking/webhook');
 
 /*
 |--------------------------------------------------------------------------
@@ -556,4 +620,4 @@ $config['rewrite_short_tags'] = FALSE;
 | Comma-separated:	'10.0.1.200,192.168.5.0/24'
 | Array:		array('10.0.1.200', '192.168.5.0/24')
 */
-$config['proxy_ips'] = '';
+$config['proxy_ips'] = kupiana_env('TRUSTED_PROXY_IPS', '');

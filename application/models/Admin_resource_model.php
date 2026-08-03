@@ -39,6 +39,7 @@ class Admin_resource_model extends MY_Model
 		$this->sortable = array_values(array_diff($names, array('deleted_at')));
 		$this->filterable = in_array('status', $names, TRUE) ? array('status' => 'status') : array();
 		$this->hidden = in_array('password', $names, TRUE) ? array('password') : array();
+		$this->status_column = ($this->table === 'payments' && in_array('status_flag', $names, TRUE)) ? 'status_flag' : 'status';
 		return $this;
 	}
 

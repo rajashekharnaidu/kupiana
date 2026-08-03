@@ -53,6 +53,42 @@
  *
  * NOTE: If you change these, also change the error_reporting() code below
  */
+	if (!isset($_SERVER['CI_ENV']) && getenv('CI_ENV') !== FALSE) {
+		$_SERVER['CI_ENV'] = getenv('CI_ENV');
+	}
+
+	if (!isset($_SERVER['CI_ENV'])) {
+		$_kupiana_env_file = __DIR__.DIRECTORY_SEPARATOR.'.env';
+
+		if (is_file($_kupiana_env_file) && is_readable($_kupiana_env_file)) {
+			foreach (file($_kupiana_env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $_kupiana_env_line) {
+				$_kupiana_env_line = trim($_kupiana_env_line);
+
+				if ($_kupiana_env_line === '' || strpos($_kupiana_env_line, '#') === 0 || strpos($_kupiana_env_line, '=') === FALSE) {
+					continue;
+				}
+
+				list($_kupiana_env_name, $_kupiana_env_value) = explode('=', $_kupiana_env_line, 2);
+				$_kupiana_env_name = trim($_kupiana_env_name);
+				$_kupiana_env_value = trim($_kupiana_env_value);
+
+				if ($_kupiana_env_name !== 'CI_ENV') {
+					continue;
+				}
+
+				if (
+					(strlen($_kupiana_env_value) >= 2)
+					&& (($_kupiana_env_value[0] === '"' && substr($_kupiana_env_value, -1) === '"') || ($_kupiana_env_value[0] === "'" && substr($_kupiana_env_value, -1) === "'"))
+				) {
+					$_kupiana_env_value = substr($_kupiana_env_value, 1, -1);
+				}
+
+				$_SERVER['CI_ENV'] = $_kupiana_env_value;
+				break;
+			}
+		}
+	}
+
 	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
 
 /*

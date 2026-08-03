@@ -19,20 +19,33 @@ $assets = $this->config->item('assets', 'app');
 	<title><?php echo html_escape($meta['title']); ?></title>
 
 	<meta name="description" content="<?php echo html_escape($meta['description']); ?>">
+	<?php if ( ! empty($meta['keywords'])): ?>
+	<meta name="keywords" content="<?php echo html_escape($meta['keywords']); ?>">
+	<?php endif; ?>
 	<meta name="robots" content="<?php echo html_escape($meta['robots']); ?>">
 	<link rel="canonical" href="<?php echo html_escape($meta['canonical']); ?>">
+	<?php if ( ! empty($meta['rel_prev'])): ?>
+	<link rel="prev" href="<?php echo html_escape($meta['rel_prev']); ?>">
+	<?php endif; ?>
+	<?php if ( ! empty($meta['rel_next'])): ?>
+	<link rel="next" href="<?php echo html_escape($meta['rel_next']); ?>">
+	<?php endif; ?>
+	<link rel="alternate" hreflang="en-IN" href="<?php echo html_escape($meta['canonical']); ?>">
+	<link rel="alternate" hreflang="x-default" href="<?php echo html_escape($meta['canonical']); ?>">
 
 	<meta property="og:site_name" content="<?php echo html_escape($site_name); ?>">
-	<meta property="og:title" content="<?php echo html_escape($meta['title']); ?>">
-	<meta property="og:description" content="<?php echo html_escape($meta['description']); ?>">
+	<meta property="og:locale" content="en_IN">
+	<meta property="og:title" content="<?php echo html_escape($meta['og_title']); ?>">
+	<meta property="og:description" content="<?php echo html_escape($meta['og_description']); ?>">
 	<meta property="og:type" content="<?php echo html_escape($meta['og_type']); ?>">
 	<meta property="og:url" content="<?php echo html_escape($meta['canonical']); ?>">
 	<meta property="og:image" content="<?php echo html_escape($meta['og_image']); ?>">
 
-	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:title" content="<?php echo html_escape($meta['title']); ?>">
-	<meta name="twitter:description" content="<?php echo html_escape($meta['description']); ?>">
+	<meta name="twitter:card" content="<?php echo html_escape($meta['twitter_card']); ?>">
+	<meta name="twitter:title" content="<?php echo html_escape($meta['og_title']); ?>">
+	<meta name="twitter:description" content="<?php echo html_escape($meta['og_description']); ?>">
 	<meta name="twitter:image" content="<?php echo html_escape($meta['og_image']); ?>">
+	<meta name="twitter:url" content="<?php echo html_escape($meta['canonical']); ?>">
 
 	<link rel="icon" href="<?php echo base_url(array_get($app, 'favicon', 'public/assets/images/favicon.png')); ?>">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +55,7 @@ $assets = $this->config->item('assets', 'app');
 	<link rel="stylesheet" href="<?php echo base_url('public/assets/css/app.css'); ?>">
 
 	<?php if ( ! empty($json_ld)): ?>
-	<script type="application/ld+json"><?php echo is_array($json_ld) ? json_encode($json_ld) : $json_ld; ?></script>
+	<script type="application/ld+json"><?php echo is_array($json_ld) ? json_encode($json_ld, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : $json_ld; ?></script>
 	<?php endif; ?>
 </head>
 <body class="store-body <?php echo isset($body_class) ? html_escape($body_class) : ''; ?>">

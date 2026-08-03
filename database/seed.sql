@@ -115,13 +115,13 @@ INSERT INTO `tax_rates` (`id`,`name`,`rate`,`type`,`is_default`,`created_at`,`up
 (5,'GST 28%',28.00,'gst',0,@now,@now);
 
 INSERT INTO `hsn_codes` (`code`,`description`,`gst_rate`,`created_at`,`updated_at`) VALUES
-('6109','T-shirts, singlets and other vests, knitted',5.00,@now,@now),
-('6203','Men''s suits, jackets, trousers',12.00,@now,@now),
-('4202','Trunks, suitcases, handbags, wallets',18.00,@now,@now),
-('8517','Telephone sets, smartphones',18.00,@now,@now),
-('8518','Headphones, earphones, speakers',18.00,@now,@now),
-('9503','Toys, puzzles and games',12.00,@now,@now),
-('3304','Beauty and skincare preparations',18.00,@now,@now);
+('0904','Pepper and dried chillies',5.00,@now,@now),
+('0908','Nutmeg, mace and cardamom',5.00,@now,@now),
+('0910','Ginger, turmeric and mixed spices',5.00,@now,@now),
+('1207','Oil seeds and oleaginous fruits',5.00,@now,@now),
+('1508','Groundnut oil and fractions',5.00,@now,@now),
+('1513','Coconut oil and fractions',5.00,@now,@now),
+('1515','Sesame oil and other fixed vegetable oils',5.00,@now,@now);
 
 -- =====================================================================
 -- Roles
@@ -309,46 +309,87 @@ INSERT INTO `suppliers`
 
 INSERT INTO `categories`
 	(`id`,`parent_id`,`name`,`slug`,`description`,`icon`,`level`,`sort_order`,`is_featured`,`created_at`,`updated_at`) VALUES
-(1,NULL,'Electronics','electronics','Phones, audio and everyday tech.','fa-mobile-screen',0,1,1,@now,@now),
-(2,NULL,'Fashion','fashion','Clothing and accessories for every day.','fa-shirt',0,2,1,@now,@now),
-(3,NULL,'Home & Living','home-living','Furnishing and decor essentials.','fa-couch',0,3,1,@now,@now),
-(4,NULL,'Beauty','beauty','Skincare and personal care.','fa-spa',0,4,0,@now,@now),
-(5,1,'Audio','audio','Headphones, earbuds and speakers.',NULL,1,1,0,@now,@now),
-(6,1,'Smartphones','smartphones','Latest smartphones and accessories.',NULL,1,2,0,@now,@now),
-(7,2,'Men','fashion-men','Menswear and accessories.',NULL,1,1,0,@now,@now),
-(8,2,'Women','fashion-women','Womenswear and accessories.',NULL,1,2,0,@now,@now),
-(9,2,'Bags','bags','Backpacks, totes and wallets.',NULL,1,3,0,@now,@now),
-(10,3,'Kitchen','kitchen','Cookware and kitchen tools.',NULL,1,1,0,@now,@now);
+(1,NULL,'Organic Spices','organic-spices','Certified organic spice powders and everyday Indian pantry essentials.','fa-seedling',0,1,1,@now,@now),
+(2,NULL,'Cold-Pressed Oils','cold-pressed-oils','Cold-pressed and wood-pressed oils for everyday cooking and finishing.','fa-bottle-droplet',0,2,1,@now,@now),
+(3,NULL,'Whole Spices','whole-spices','Whole spices selected for aroma, freshness and traceable sourcing.','fa-mortar-pestle',0,3,1,@now,@now),
+(4,NULL,'Ground Masalas','ground-masalas','Fresh-ground masala blends made in small batches.','fa-jar',0,4,1,@now,@now),
+(5,1,'Turmeric & Ginger','turmeric-ginger','Golden turmeric, dry ginger and warming root spices.','fa-leaf',1,1,0,@now,@now),
+(6,3,'Pepper & Cardamom','pepper-cardamom','Peppercorns, cardamom and fragrant whole spices.','fa-pepper-hot',1,2,0,@now,@now),
+(7,2,'Sesame & Groundnut Oils','sesame-groundnut-oils','Groundnut and sesame oils pressed slowly for natural flavour.','fa-oil-can',1,1,0,@now,@now),
+(8,2,'Coconut & Mustard Oils','coconut-mustard-oils','Coconut and mustard oils for traditional kitchens.','fa-bottle-water',1,2,0,@now,@now),
+(9,4,'Herbal Blends','herbal-blends','Herbal spice blends for teas, broths and everyday wellness.','fa-spa',1,1,0,@now,@now),
+(10,1,'Pantry Staples','pantry-staples','Organic pantry staples for flavourful daily cooking.','fa-wheat-awn',1,3,0,@now,@now);
 
 INSERT INTO `brands` (`id`,`name`,`slug`,`description`,`is_featured`,`sort_order`,`created_at`,`updated_at`) VALUES
-(1,'Aurex','aurex','Audio equipment engineered for clarity.',1,1,@now,@now),
-(2,'Northwind','northwind','Durable everyday carry and bags.',1,2,@now,@now),
-(3,'Lumen','lumen','Minimal home and lighting goods.',1,3,@now,@now),
-(4,'Verda','verda','Clean, plant-derived skincare.',0,4,@now,@now);
+(1,'Kupiana Organics','kupiana-organics','Kupiana Organics curates clean, traceable spices and pantry staples.',1,1,@now,@now),
+(2,'Malabar Grove','malabar-grove','Malabar Grove specialises in pepper, cardamom and coastal whole spices.',1,2,@now,@now),
+(3,'Deccan Press','deccan-press','Deccan Press makes slow-pressed cooking oils from quality seeds and nuts.',1,3,@now,@now),
+(4,'Nilgiri Botanics','nilgiri-botanics','Nilgiri Botanics blends aromatic herbs and fresh-ground masalas.',1,4,@now,@now);
+
+-- Every category has its own photograph, named after its slug. Keep this
+-- slug-driven: tools/build_images.php writes categories/<slug>.jpg, so adding
+-- a category needs a recipe there and nothing here.
+UPDATE `categories` SET `image` = CONCAT('categories/', `slug`, '.jpg'),
+`banner` = CASE WHEN `id` IN (1,2,3,4) THEN 'banners/organic-spices-hero.jpg' ELSE NULL END,
+`meta_title` = CASE `id`
+	WHEN 1 THEN 'Organic Spices Online'
+	WHEN 2 THEN 'Cold-Pressed Oils Online'
+	WHEN 3 THEN 'Whole Spices Online'
+	WHEN 4 THEN 'Ground Masalas Online'
+	ELSE `name`
+END,
+`meta_description` = CASE `id`
+	WHEN 1 THEN 'Buy organic spices, turmeric, chilli powder and masalas online from Kupiana.'
+	WHEN 2 THEN 'Shop cold-pressed groundnut, sesame, coconut and mustard oils from Kupiana.'
+	WHEN 3 THEN 'Discover whole spices including pepper, cardamom and cumin at Kupiana.'
+	WHEN 4 THEN 'Fresh-ground masalas made in small batches for everyday Indian cooking.'
+	ELSE `description`
+END,
+`meta_keywords` = 'organic spices, cold pressed oils, masala, whole spices, Kupiana';
+
+UPDATE `brands` SET `logo` = CASE `id`
+	WHEN 1 THEN 'brands/kupiana-organics.svg'
+	WHEN 2 THEN 'brands/malabar-grove.svg'
+	WHEN 3 THEN 'brands/deccan-press.svg'
+	WHEN 4 THEN 'brands/nilgiri-botanics.svg'
+END,
+`banner` = 'banners/organic-spices-hero.jpg',
+`meta_title` = CASE `id`
+	WHEN 1 THEN 'Kupiana Organics'
+	WHEN 2 THEN 'Malabar Grove Spices'
+	WHEN 3 THEN 'Deccan Press Oils'
+	WHEN 4 THEN 'Nilgiri Botanics Masalas'
+END,
+`meta_description` = CASE `id`
+	WHEN 1 THEN 'Shop organic spices and pantry staples by Kupiana Organics.'
+	WHEN 2 THEN 'Buy Malabar pepper, cardamom and whole spices from Kupiana.'
+	WHEN 3 THEN 'Shop cold-pressed cooking oils from Deccan Press.'
+	WHEN 4 THEN 'Discover herbal blends and fresh masalas by Nilgiri Botanics.'
+END;
 
 INSERT INTO `attributes` (`id`,`name`,`slug`,`type`,`is_variation`,`is_filterable`,`sort_order`,`created_at`,`updated_at`) VALUES
-(1,'Colour','colour','color',1,1,1,@now,@now),
-(2,'Size','size','button',1,1,2,@now,@now),
-(3,'Material','material','select',0,1,3,@now,@now);
+(1,'Pack Type','pack-type','select',0,1,1,@now,@now),
+(2,'Pack Size','pack-size','button',1,1,2,@now,@now),
+(3,'Source','source','select',0,1,3,@now,@now);
 
 INSERT INTO `attribute_values` (`attribute_id`,`value`,`slug`,`color_code`,`sort_order`,`created_at`,`updated_at`) VALUES
-(1,'Black','black','#111827',1,@now,@now),
-(1,'White','white','#f9fafb',2,@now,@now),
-(1,'Navy','navy','#1e3a8a',3,@now,@now),
-(1,'Sand','sand','#d6c7a8',4,@now,@now),
-(2,'S','s',NULL,1,@now,@now),
-(2,'M','m',NULL,2,@now,@now),
-(2,'L','l',NULL,3,@now,@now),
-(2,'XL','xl',NULL,4,@now,@now),
-(3,'Cotton','cotton',NULL,1,@now,@now),
-(3,'Leather','leather',NULL,2,@now,@now),
-(3,'Recycled Nylon','recycled-nylon',NULL,3,@now,@now);
+(1,'Powder','powder',NULL,1,@now,@now),
+(1,'Whole','whole',NULL,2,@now,@now),
+(1,'Oil','oil',NULL,3,@now,@now),
+(1,'Blend','blend',NULL,4,@now,@now),
+(2,'50g','50g',NULL,1,@now,@now),
+(2,'100g','100g',NULL,2,@now,@now),
+(2,'500ml','500ml',NULL,3,@now,@now),
+(2,'1L','1l',NULL,4,@now,@now),
+(3,'Organic Farm','organic-farm',NULL,1,@now,@now),
+(3,'Single Origin','single-origin',NULL,2,@now,@now),
+(3,'Small Batch','small-batch',NULL,3,@now,@now);
 
 INSERT INTO `tags` (`name`,`slug`,`created_at`,`updated_at`) VALUES
-('New Arrival','new-arrival',@now,@now),
+('Fresh Harvest','fresh-harvest',@now,@now),
 ('Best Seller','best-seller',@now,@now),
-('Eco Friendly','eco-friendly',@now,@now),
-('Limited Edition','limited-edition',@now,@now);
+('Certified Organic','certified-organic',@now,@now),
+('Small Batch','small-batch',@now,@now);
 
 INSERT INTO `products`
 	(`id`,`uuid`,`name`,`slug`,`sku`,`brand_id`,`category_id`,`tax_rate_id`,`type`,
@@ -356,87 +397,97 @@ INSERT INTO `products`
 	 `stock_quantity`,`low_stock_threshold`,`weight`,
 	 `is_featured`,`is_trending`,`is_bestseller`,`is_new_arrival`,
 	 `rating_average`,`rating_count`,`sold_count`,`published_at`,`status`,`created_at`,`updated_at`) VALUES
-(1,'11111111-1111-4111-8111-111111111101','Aurex Studio Wireless Headphones','aurex-studio-wireless-headphones','AUR-HP-001',
- 1,5,4,'simple','Over-ear wireless headphones with 40-hour battery and adaptive noise cancelling.',
- '<p>Studio-grade drivers, adaptive noise cancelling and a 40-hour battery. Memory-foam ear cushions and a folding frame make them equally at home on a commute or a long-haul flight.</p>',
- 8499.00,11999.00,5200.00,'8518',45,10,0.290,1,1,1,0,4.60,38,120,@now,'active',@now,@now),
-(2,'11111111-1111-4111-8111-111111111102','Aurex Pulse Wireless Earbuds','aurex-pulse-wireless-earbuds','AUR-EB-002',
- 1,5,4,'simple','Compact true-wireless earbuds with a 28-hour charging case.',
- '<p>Six-hour playback per charge and 28 hours total with the pocketable case. IPX5 water resistance and touch controls.</p>',
- 3299.00,4999.00,1850.00,'8518',80,15,0.058,1,1,1,1,4.30,64,240,@now,'active',@now,@now),
-(3,'11111111-1111-4111-8111-111111111103','Northwind Daypack 22L','northwind-daypack-22l','NWD-BP-003',
- 2,9,4,'variable','Water-resistant 22-litre daypack in recycled nylon.',
- '<p>A padded 16-inch laptop sleeve, water-resistant recycled nylon shell and a clamshell opening that actually lets you pack properly.</p>',
- 4250.00,5500.00,2400.00,'4202',30,8,0.780,1,0,1,0,4.70,22,86,@now,'active',@now,@now),
-(4,'11111111-1111-4111-8111-111111111104','Northwind Bifold Wallet','northwind-bifold-wallet','NWD-WL-004',
- 2,9,4,'simple','Full-grain leather bifold with RFID blocking.',
- '<p>Full-grain leather that ages well, six card slots and an RFID-blocking lining.</p>',
- 1899.00,2499.00,900.00,'4202',120,20,0.110,0,1,0,1,4.40,17,58,@now,'active',@now,@now),
-(5,'11111111-1111-4111-8111-111111111105','Lumen Ceramic Table Lamp','lumen-ceramic-table-lamp','LMN-LP-005',
- 3,3,4,'simple','Hand-glazed ceramic lamp with a linen shade.',
- '<p>Hand-glazed stoneware base with a natural linen shade. Warm, diffused light for a bedside or console.</p>',
- 3750.00,4500.00,1900.00,'9405',18,5,1.950,1,0,0,1,4.80,9,24,@now,'active',@now,@now),
-(6,'11111111-1111-4111-8111-111111111106','Lumen Stoneware Mug Set of 4','lumen-stoneware-mug-set','LMN-MG-006',
- 3,10,3,'simple','Reactive-glaze stoneware mugs, 350ml each.',
- '<p>Four 350ml mugs with a reactive glaze, so no two are quite alike. Dishwasher and microwave safe.</p>',
- 1650.00,2200.00,780.00,'6912',6,10,1.400,0,0,1,0,4.50,31,140,@now,'active',@now,@now),
-(7,'11111111-1111-4111-8111-111111111107','Verda Vitamin C Serum 30ml','verda-vitamin-c-serum','VRD-SR-007',
- 4,4,4,'simple','15% vitamin C with hyaluronic acid.',
- '<p>A 15% L-ascorbic acid serum buffered with hyaluronic acid and vitamin E. Fragrance free.</p>',
- 1299.00,1799.00,520.00,'3304',0,10,0.060,0,1,0,1,4.20,53,310,@now,'active',@now,@now),
-(8,'11111111-1111-4111-8111-111111111108','Kupiana Essential Cotton Tee','kupiana-essential-cotton-tee','KPN-TS-008',
- NULL,7,2,'variable','240gsm combed cotton crew neck.',
- '<p>240gsm combed organic cotton, pre-shrunk, with a ribbed collar that keeps its shape.</p>',
- 899.00,1299.00,350.00,'6109',200,25,0.220,0,0,1,1,4.10,88,520,@now,'active',@now,@now),
-(9,'11111111-1111-4111-8111-111111111109','Lumen Linen Cushion Cover','lumen-linen-cushion-cover','LMN-CC-009',
- 3,3,3,'simple','Stonewashed linen cover, 45x45cm.',
- '<p>Stonewashed European linen with a concealed zip. Cover only.</p>',
- 749.00,999.00,300.00,'6304',60,10,0.180,0,0,0,1,4.00,12,40,@now,'active',@now,@now),
-(10,'11111111-1111-4111-8111-111111111110','Aurex Desk Speaker','aurex-desk-speaker','AUR-SP-010',
- 1,5,4,'simple','Compact bookshelf speaker with Bluetooth 5.3.',
- '<p>A 40W compact desk speaker with Bluetooth 5.3, USB-C and a 3.5mm aux input.</p>',
- 5499.00,6999.00,3100.00,'8518',12,10,1.100,0,1,0,0,4.30,14,47,@now,'draft',@now,@now);
+(1,'11111111-1111-4111-8111-111111111101','Organic Lakadong Turmeric Powder','organic-lakadong-turmeric-powder','SP-TUR-100',
+ 1,5,2,'simple','High-curcumin organic Lakadong turmeric, ground fresh in small batches.',
+ '<p>Our Lakadong turmeric is sourced from organic farms and milled in small batches to preserve its warm aroma, deep golden colour and naturally high curcumin character.</p>',
+ 249.00,299.00,130.00,'0910',140,15,0.100,1,1,1,0,4.80,64,260,@now,'active',@now,@now),
+(2,'11111111-1111-4111-8111-111111111102','Malabar Black Pepper Whole','malabar-black-pepper-whole','SP-PEP-100',
+ 2,6,2,'simple','Sun-dried Malabar black peppercorns with bold aroma and clean heat.',
+ '<p>Whole Malabar peppercorns are sun-dried after harvest and packed for freshness, giving everyday cooking a rounded heat and bright fragrance.</p>',
+ 329.00,399.00,180.00,'0910',90,15,0.100,1,0,1,0,4.70,51,190,@now,'active',@now,@now),
+(3,'11111111-1111-4111-8111-111111111103','Cold-Pressed Groundnut Oil','cold-pressed-groundnut-oil','OIL-GND-1L',
+ 3,7,2,'simple','Cold-pressed groundnut oil for everyday Indian cooking and deep flavour.',
+ '<p>Made from quality groundnuts and pressed slowly without high heat, this cooking oil keeps its natural nutty flavour for tadkas, saut&eacute;s and traditional recipes.</p>',
+ 399.00,499.00,250.00,'1508',70,12,1.000,1,1,1,0,4.60,42,160,@now,'active',@now,@now),
+(4,'11111111-1111-4111-8111-111111111104','Wood-Pressed Sesame Oil','wood-pressed-sesame-oil','OIL-SES-1L',
+ 3,7,2,'simple','Wood-pressed sesame oil with a nutty aroma for cooking, pickles and finishing.',
+ '<p>Wood-pressed sesame oil brings a deep, nutty profile to pickles, podis, stir-fries and South Indian cooking. Packed in a kitchen-friendly one-litre bottle.</p>',
+ 449.00,549.00,285.00,'1515',60,12,1.000,1,1,0,1,4.50,35,120,@now,'active',@now,@now),
+(5,'11111111-1111-4111-8111-111111111105','Virgin Coconut Oil','virgin-coconut-oil','OIL-COC-500',
+ 3,8,2,'simple','Virgin coconut oil pressed from mature coconuts for cooking and pantry use.',
+ '<p>Virgin coconut oil pressed from mature coconuts with a clean aroma and smooth texture, suitable for cooking, baking and everyday pantry use.</p>',
+ 299.00,359.00,180.00,'1513',85,15,0.500,1,0,0,1,4.40,29,135,@now,'active',@now,@now),
+(6,'11111111-1111-4111-8111-111111111106','Kashmiri Chilli Powder','kashmiri-chilli-powder','SP-CHI-100',
+ 1,4,2,'simple','Vibrant Kashmiri chilli powder for rich colour and balanced warmth.',
+ '<p>Kashmiri chilli powder is prized for its brilliant red colour and gentle heat, making curries, marinades and spice rubs look as good as they taste.</p>',
+ 219.00,269.00,115.00,'0910',110,15,0.100,0,1,0,1,4.60,48,210,@now,'active',@now,@now),
+(7,'11111111-1111-4111-8111-111111111107','Organic Garam Masala Blend','organic-garam-masala-blend','SP-GAR-100',
+ 4,4,2,'simple','Small-batch garam masala made with roasted whole spices.',
+ '<p>This garam masala is blended from roasted whole spices including cinnamon, cloves, pepper and cardamom, then ground in small batches for fresh aroma.</p>',
+ 279.00,349.00,145.00,'0910',45,15,0.100,1,1,1,0,4.80,57,180,@now,'active',@now,@now),
+(8,'11111111-1111-4111-8111-111111111108','Green Cardamom Pods','green-cardamom-pods','SP-CAR-50',
+ 2,6,2,'simple','Aromatic green cardamom pods for sweets, chai and festive cooking.',
+ '<p>Green cardamom pods deliver sweet, floral fragrance for chai, desserts, biryanis and festive recipes. Store airtight for best aroma.</p>',
+ 349.00,425.00,205.00,'0910',55,15,0.050,1,1,0,0,4.70,31,92,@now,'active',@now,@now),
+(9,'11111111-1111-4111-8111-111111111109','Ginger Garlic Spice Mix','ginger-garlic-spice-mix','SP-GIN-100',
+ 4,9,2,'simple','Ready ginger-garlic spice mix for quick marinades, curries and stir-fries.',
+ '<p>A convenient ginger-garlic spice mix for quick weekday cooking, marinades and curry bases, made without artificial colours.</p>',
+ 199.00,249.00,95.00,'0910',125,15,0.100,0,0,0,1,4.30,22,75,@now,'active',@now,@now),
+(10,'11111111-1111-4111-8111-111111111110','Organic Cumin Seeds','organic-cumin-seeds','SP-CUM-100',
+ 1,3,2,'simple','Earthy organic cumin seeds selected for tempering and spice blends.',
+ '<p>Organic cumin seeds with an earthy, warm profile for tempering dals, seasoning vegetables and grinding into fresh masalas.</p>',
+ 189.00,229.00,88.00,'0910',95,15,0.100,1,0,1,0,4.50,38,150,@now,'active',@now,@now);
 
 INSERT INTO `product_categories` (`product_id`,`category_id`,`created_at`,`updated_at`) VALUES
 (1,1,@now,@now),(1,5,@now,@now),
-(2,1,@now,@now),(2,5,@now,@now),
-(3,2,@now,@now),(3,9,@now,@now),
-(4,2,@now,@now),(4,9,@now,@now),
-(5,3,@now,@now),
-(6,3,@now,@now),(6,10,@now,@now),
-(7,4,@now,@now),
-(8,2,@now,@now),(8,7,@now,@now),
-(9,3,@now,@now),
-(10,1,@now,@now),(10,5,@now,@now);
+(2,3,@now,@now),(2,6,@now,@now),
+(3,2,@now,@now),(3,7,@now,@now),
+(4,2,@now,@now),(4,7,@now,@now),
+(5,2,@now,@now),(5,8,@now,@now),
+(6,1,@now,@now),(6,4,@now,@now),
+(7,1,@now,@now),(7,4,@now,@now),
+(8,3,@now,@now),(8,6,@now,@now),
+(9,4,@now,@now),(9,9,@now,@now),
+(10,1,@now,@now),(10,3,@now,@now);
 
--- Placeholder imagery. Replace with real uploads through the admin panel.
+UPDATE `categories` c
+SET `product_count` = (
+	SELECT COUNT(DISTINCT pc.`product_id`)
+	FROM `product_categories` pc
+	JOIN `products` p ON p.`id` = pc.`product_id`
+	WHERE pc.`category_id` = c.`id`
+		AND pc.`deleted_at` IS NULL
+		AND pc.`status` = 'active'
+		AND p.`status` = 'active'
+		AND p.`deleted_at` IS NULL
+);
+
+-- Organic pantry imagery used by the storefront and admin catalog.
 INSERT INTO `product_images` (`product_id`,`image_path`,`alt_text`,`sort_order`,`is_primary`,`created_at`,`updated_at`) VALUES
-(1,'products/placeholder.svg','Aurex Studio Wireless Headphones',0,1,@now,@now),
-(2,'products/placeholder.svg','Aurex Pulse Wireless Earbuds',0,1,@now,@now),
-(3,'products/placeholder.svg','Northwind Daypack 22L',0,1,@now,@now),
-(4,'products/placeholder.svg','Northwind Bifold Wallet',0,1,@now,@now),
-(5,'products/placeholder.svg','Lumen Ceramic Table Lamp',0,1,@now,@now),
-(6,'products/placeholder.svg','Lumen Stoneware Mug Set',0,1,@now,@now),
-(7,'products/placeholder.svg','Verda Vitamin C Serum',0,1,@now,@now),
-(8,'products/placeholder.svg','Kupiana Essential Cotton Tee',0,1,@now,@now),
-(9,'products/placeholder.svg','Lumen Linen Cushion Cover',0,1,@now,@now),
-(10,'products/placeholder.svg','Aurex Desk Speaker',0,1,@now,@now);
+(1,'products/organic-lakadong-turmeric-powder.jpg','Organic Lakadong Turmeric Powder',0,1,@now,@now),
+(2,'products/malabar-black-pepper-whole.jpg','Malabar Black Pepper Whole',0,1,@now,@now),
+(3,'products/cold-pressed-groundnut-oil.jpg','Cold-Pressed Groundnut Oil',0,1,@now,@now),
+(4,'products/wood-pressed-sesame-oil.jpg','Wood-Pressed Sesame Oil',0,1,@now,@now),
+(5,'products/virgin-coconut-oil.jpg','Virgin Coconut Oil',0,1,@now,@now),
+(6,'products/kashmiri-chilli-powder.jpg','Kashmiri Chilli Powder',0,1,@now,@now),
+(7,'products/organic-garam-masala-blend.jpg','Organic Garam Masala Blend',0,1,@now,@now),
+(8,'products/green-cardamom-pods.jpg','Green Cardamom Pods',0,1,@now,@now),
+(9,'products/ginger-garlic-spice-mix.jpg','Ginger Garlic Spice Mix',0,1,@now,@now),
+(10,'products/organic-cumin-seeds.jpg','Organic Cumin Seeds',0,1,@now,@now);
 
 -- Opening stock in the main warehouse. variant_id 0 = product has no variant.
--- Deliberately varied so the Low Stock and Out of Stock screens have data:
---   product 6  -> 6 units against a threshold of 10 (low stock)
---   product 7  -> 0 units                            (out of stock)
+-- Pantry stock quantities give the admin inventory screens realistic data.
 INSERT INTO `inventory` (`product_id`,`variant_id`,`warehouse_id`,`quantity`,`reorder_level`,`created_at`,`updated_at`) VALUES
-(1,0,1,45,10,@now,@now),
-(2,0,1,80,15,@now,@now),
-(3,0,1,30,8,@now,@now),
-(4,0,1,120,20,@now,@now),
-(5,0,1,18,5,@now,@now),
-(6,0,1,6,10,@now,@now),
-(7,0,1,0,10,@now,@now),
-(8,0,1,200,25,@now,@now),
-(9,0,1,60,10,@now,@now),
-(10,0,1,12,10,@now,@now);
+(1,0,1,140,15,@now,@now),
+(2,0,1,90,15,@now,@now),
+(3,0,1,70,12,@now,@now),
+(4,0,1,60,12,@now,@now),
+(5,0,1,85,15,@now,@now),
+(6,0,1,110,15,@now,@now),
+(7,0,1,45,15,@now,@now),
+(8,0,1,55,15,@now,@now),
+(9,0,1,125,15,@now,@now),
+(10,0,1,95,15,@now,@now);
 
 -- =====================================================================
 -- Promotions
@@ -457,16 +508,16 @@ INSERT INTO `coupons`
 -- =====================================================================
 
 INSERT INTO `banners` (`title`,`subtitle`,`image`,`link_url`,`button_text`,`position`,`sort_order`,`created_at`,`updated_at`) VALUES
-('Sound, considered.','Up to 30% off the Aurex audio range.','banners/placeholder.svg','shop','Shop Audio','home_slider',1,@now,@now),
-('Built to be carried.','Northwind bags in recycled nylon.','banners/placeholder.svg','category/bags','Shop Bags','home_slider',2,@now,@now),
-('New in Home & Living','Warm ceramics and soft linen.','banners/placeholder.svg','category/home-living','Explore','home_banner',1,@now,@now);
+('Fresh-ground organic spices','Turmeric, chilli, garam masala and whole spices packed for aroma.','banners/organic-spices-hero.jpg','category/organic-spices','Shop Spices','home_slider',1,@now,@now),
+('Cold-pressed oils for daily cooking','Groundnut, sesame and coconut oils pressed slowly in small batches.','banners/cold-pressed-oils.jpg','category/cold-pressed-oils','Shop Oils','home_slider',2,@now,@now),
+('Build a cleaner pantry','Organic staples, spice blends and oils for everyday Indian kitchens.','banners/cleaner-pantry.jpg','shop','Explore Pantry','home_banner',1,@now,@now);
 
 INSERT INTO `pages` (`title`,`slug`,`content`,`is_system`,`meta_title`,`meta_description`,`created_at`,`updated_at`) VALUES
-('About Us','about','<h2>About Kupiana</h2><p>Kupiana is a curated commerce destination for refined everyday pieces, thoughtful gifting and beautiful essentials. Replace this copy from Admin &rsaquo; Website CMS &rsaquo; Pages.</p>',1,'About Us','Learn about Kupiana, our story and what we stand for.',@now,@now),
-('Privacy Policy','privacy-policy','<h2>Privacy Policy</h2><p>This placeholder describes what data we collect, why we collect it and how it is stored. Replace it with your reviewed legal copy before launch.</p>',1,'Privacy Policy','How Kupiana collects, uses and protects your personal data.',@now,@now),
-('Terms of Use','terms','<h2>Terms of Use</h2><p>Placeholder terms governing use of this website and the purchase of goods. Replace with your reviewed legal copy before launch.</p>',1,'Terms of Use','The terms governing your use of the Kupiana website.',@now,@now),
-('Return Policy','return-policy','<h2>Return Policy</h2><p>Most items can be returned within 7 days of delivery in their original condition and packaging. Replace with your final policy.</p>',1,'Return Policy','How to return or exchange an item purchased from Kupiana.',@now,@now),
-('Shipping Policy','shipping-policy','<h2>Shipping Policy</h2><p>Orders are dispatched within 1&ndash;2 business days. Free shipping applies to orders above &#8377;999. Replace with your final policy.</p>',1,'Shipping Policy','Delivery timelines, charges and coverage for Kupiana orders.',@now,@now);
+('About Us','about','<h2>About Kupiana</h2><p>Kupiana is an organic pantry store for fresh-ground spices, whole masalas and cold-pressed cooking oils. We work with trusted growers and small-batch producers so everyday cooking tastes cleaner, brighter and more aromatic.</p>',1,'About Kupiana Organic Spices & Oils','Learn about Kupiana organic spices, whole masalas and cold-pressed cooking oils.',@now,@now),
+('Privacy Policy','privacy-policy','<h2>Privacy Policy</h2><p>This policy explains how Kupiana collects and protects customer information while processing orders for organic spices, cooking oils and pantry goods.</p>',1,'Privacy Policy','How Kupiana protects customer information for pantry orders.',@now,@now),
+('Terms of Use','terms','<h2>Terms of Use</h2><p>These terms govern use of the Kupiana website and purchase of organic spices, oils and pantry products. Please review final legal copy before launch.</p>',1,'Terms of Use','Terms for shopping organic spices, oils and pantry goods at Kupiana.',@now,@now),
+('Return Policy','return-policy','<h2>Return Policy</h2><p>Food and pantry items can be returned only if delivered damaged, incorrect or unopened as per the final return policy. Please contact support within 7 days of delivery.</p>',1,'Return Policy for Organic Pantry Orders','Return guidance for organic spices, oils and pantry products ordered from Kupiana.',@now,@now),
+('Shipping Policy','shipping-policy','<h2>Shipping Policy</h2><p>Organic spices and oils are packed securely and dispatched within 1&ndash;2 business days. Free shipping applies to orders above &#8377;999.</p>',1,'Shipping Organic Spices and Oils','Delivery timelines and packing details for Kupiana organic spices and oils.',@now,@now);
 
 INSERT INTO `faqs` (`category`,`question`,`answer`,`sort_order`,`created_at`,`updated_at`) VALUES
 ('Orders','How do I track my order?','Sign in and open My Orders, or use the Track Order page with your order number and registered email.',1,@now,@now),
@@ -479,14 +530,14 @@ INSERT INTO `faqs` (`category`,`question`,`answer`,`sort_order`,`created_at`,`up
 ('Payments','Is it safe to pay online?','Yes. Payments are processed by Razorpay over an encrypted connection. We never store your card details.',8,@now,@now);
 
 INSERT INTO `testimonials` (`name`,`designation`,`company`,`rating`,`content`,`sort_order`,`is_featured`,`created_at`,`updated_at`) VALUES
-('Ananya Rao','Product Designer',NULL,5,'The packaging was genuinely lovely and the headphones arrived a day early. Easily my best online order this year.',1,1,@now,@now),
-('Vikram Shah','Founder','Wren Studio',5,'Ordered mugs for the whole studio. Consistent quality, and the invoice and GST details were spot on.',2,1,@now,@now),
-('Meera Iyer',NULL,NULL,4,'Great daypack. Took one star off only because I wanted a second colour option, which they have since added.',3,1,@now,@now);
+('Ananya Rao','Home Chef',NULL,5,'The turmeric and garam masala smelled freshly ground the moment I opened the pack. My dal has genuinely more depth now.',1,1,@now,@now),
+('Vikram Shah','Cafe Owner','Wren Kitchen',5,'We ordered cold-pressed sesame and groundnut oils for our kitchen. Clean packing, consistent flavour and GST details were spot on.',2,1,@now,@now),
+('Meera Iyer','Food Blogger',NULL,4,'The cardamom pods and Kashmiri chilli powder are pantry keepers. Beautiful aroma, rich colour and quick delivery.',3,1,@now,@now);
 
 INSERT INTO `blog_categories` (`name`,`slug`,`description`,`created_at`,`updated_at`) VALUES
-('Buying Guides','buying-guides','Advice on choosing the right product.',@now,@now),
-('Behind the Brand','behind-the-brand','Stories from the makers we work with.',@now,@now),
-('News','news','Announcements and launches.',@now,@now);
+('Spice Guides','spice-guides','How to choose, store and cook with organic spices.',@now,@now),
+('Farm & Press Stories','farm-press-stories','Stories from growers, millers and cold-pressed oil makers.',@now,@now),
+('Kitchen Notes','kitchen-notes','Recipes, pantry tips and seasonal kitchen ideas.',@now,@now);
 
 -- =====================================================================
 -- System settings
@@ -495,7 +546,7 @@ INSERT INTO `blog_categories` (`name`,`slug`,`description`,`created_at`,`updated
 
 INSERT INTO `settings` (`setting_key`,`setting_value`,`setting_group`,`setting_type`,`label`,`is_public`,`created_at`,`updated_at`) VALUES
 ('site_name','Kupiana','general','text','Site Name',1,@now,@now),
-('site_tagline','Curated commerce, delivered.','general','text','Tagline',1,@now,@now),
+('site_tagline','Organic spices and oils, delivered.','general','text','Tagline',1,@now,@now),
 ('support_email','support@kupiana.test','general','text','Support Email',1,@now,@now),
 ('support_phone','+91 90000 00000','general','text','Support Phone',1,@now,@now),
 ('address','Plot 14, Industrial Area Phase II, Bengaluru 560058','general','textarea','Business Address',1,@now,@now),
@@ -524,8 +575,8 @@ INSERT INTO `settings` (`setting_key`,`setting_value`,`setting_group`,`setting_t
 ('allow_backorder','0','inventory','bool','Allow Backorders',0,@now,@now),
 ('reserve_stock_on_order','1','inventory','bool','Reserve Stock on Order',0,@now,@now),
 
-('meta_title','Kupiana — Curated Online Store','seo','text','Default Meta Title',1,@now,@now),
-('meta_description','Shop curated electronics, fashion, home and beauty at Kupiana. Free shipping above ₹999.','seo','textarea','Default Meta Description',1,@now,@now),
+('meta_title','Kupiana — Organic Spices & Cold-Pressed Oils','seo','text','Default Meta Title',1,@now,@now),
+('meta_description','Shop organic spices, whole masalas and cold-pressed cooking oils at Kupiana. Free shipping above ₹999.','seo','textarea','Default Meta Description',1,@now,@now),
 ('google_analytics_id','','seo','text','Google Analytics ID',1,@now,@now),
 
 ('reviews_require_approval','1','catalog','bool','Reviews Require Approval',0,@now,@now),

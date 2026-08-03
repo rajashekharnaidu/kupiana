@@ -1,19 +1,13 @@
-<section class="page-heading">
-	<h1>My Account</h1>
-	<p>Welcome <?php echo html_escape($current_user ? $current_user->first_name : ''); ?>.</p>
-</section>
-
-<section class="metric-grid">
-	<article>
-		<strong>Orders</strong>
-		<span>Track order history and order status.</span>
-	</article>
-	<article>
-		<strong>Addresses</strong>
-		<span>Manage shipping and billing addresses.</span>
-	</article>
-	<article>
-		<strong>Profile</strong>
-		<span>Keep contact details up to date.</span>
-	</article>
-</section>
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<section class="py-4 border-bottom bg-light"><div class="container"><h1 class="h3 mb-1">My Account</h1><p class="text-muted mb-0">Welcome back, <?php echo html_escape($current_user->first_name); ?>.</p></div></section>
+<section class="py-5"><div class="container">
+	<div class="row g-3 mb-4">
+		<div class="col-md-4"><div class="stat-card"><div class="stat-icon text-bg-primary"><i class="fa-solid fa-box"></i></div><div><div class="stat-label">Orders</div><div class="stat-value"><?php echo count($orders); ?></div></div></div></div>
+		<div class="col-md-4"><div class="stat-card"><div class="stat-icon text-bg-danger"><i class="fa-regular fa-heart"></i></div><div><div class="stat-label">Wishlist</div><div class="stat-value"><?php echo (int) $wishlist_count; ?></div></div></div></div>
+		<div class="col-md-4"><div class="stat-card"><div class="stat-icon text-bg-success"><i class="fa-solid fa-wallet"></i></div><div><div class="stat-label">Wallet</div><div class="stat-value"><?php echo money($wallet ? $wallet->balance : 0); ?></div></div></div></div>
+	</div>
+	<div class="row g-4">
+		<div class="col-lg-8"><div class="card table-card"><div class="card-header bg-transparent d-flex justify-content-between"><h2 class="h5 mb-0">Recent Orders</h2><a href="<?php echo site_url('account/orders'); ?>">View all</a></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Order</th><th>Status</th><th>Total</th><th>Date</th></tr></thead><tbody><?php if (empty($orders)): ?><tr><td colspan="4"><?php echo empty_state('No orders yet', 'Your orders will appear here after checkout.', 'fa-box-open'); ?></td></tr><?php else: foreach ($orders as $order): ?><tr><td><a href="<?php echo site_url('account/orders/'.$order->id); ?>"><?php echo html_escape($order->order_number); ?></a></td><td><?php echo status_badge($order->order_status, 'order'); ?></td><td><?php echo money($order->total_amount); ?></td><td><?php echo format_date($order->created_at); ?></td></tr><?php endforeach; endif; ?></tbody></table></div></div></div>
+		<div class="col-lg-4"><div class="card h-100"><div class="card-body"><h2 class="h5">Quick Links</h2><div class="list-group list-group-flush"><a class="list-group-item" href="<?php echo site_url('account/profile'); ?>">Profile</a><a class="list-group-item" href="<?php echo site_url('account/security'); ?>">Security</a><a class="list-group-item" href="<?php echo site_url('account/orders'); ?>">Orders</a><a class="list-group-item" href="<?php echo site_url('account/addresses'); ?>">Addresses</a><a class="list-group-item" href="<?php echo site_url('wishlist'); ?>">Wishlist</a><a class="list-group-item" href="<?php echo site_url('cart'); ?>">Cart</a></div></div></div></div>
+	</div>
+</div></section>

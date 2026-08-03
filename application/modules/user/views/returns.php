@@ -1,0 +1,6 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<section class="py-4 border-bottom bg-light"><div class="container"><h1 class="h3 mb-1">Returns</h1><p class="text-muted mb-0">Track return and exchange requests.</p></div></section>
+<section class="py-5"><div class="container"><div class="card table-card"><div class="table-responsive"><table class="table mb-0 align-middle">
+	<thead><tr><th>Return</th><th>Order</th><th>Type</th><th>Status</th><th class="text-end">Refund Estimate</th><th>Requested</th></tr></thead>
+	<tbody><?php if (empty($returns)): ?><tr><td colspan="6"><?php echo empty_state('No returns yet', 'Delivered orders can be returned or exchanged from the order detail page.', 'fa-rotate-left'); ?></td></tr><?php else: foreach ($returns as $return): ?><tr><td><?php echo html_escape($return->return_number); ?></td><td><a href="<?php echo site_url('account/orders/'.$return->order_id); ?>"><?php echo html_escape($return->order_number); ?></a></td><td><?php echo html_escape(ucwords($return->type)); ?></td><td><?php echo status_badge($return->return_status, 'return'); ?></td><td class="text-end"><?php echo money($return->refund_amount); ?></td><td><?php echo format_datetime($return->created_at); ?></td></tr><?php endforeach; endif; ?></tbody>
+</table></div></div></div></section>

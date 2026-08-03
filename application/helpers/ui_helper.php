@@ -16,7 +16,7 @@ if ( ! function_exists('status_badge'))
 	 * Coloured badge for a record/order/payment status.
 	 *
 	 * @param  string $status
-	 * @param  string $map Which config map to read: record, order or payment.
+	 * @param  string $map Which config map to read: record, order, payment, shipment or return.
 	 * @return string
 	 */
 	function status_badge($status, $map = 'record')
@@ -25,6 +25,8 @@ if ( ! function_exists('status_badge'))
 			'record'  => app_config('record_statuses', array()),
 			'order'   => app_config('order_statuses', array()),
 			'payment' => app_config('payment_statuses', array()),
+			'shipment' => app_config('shipment_statuses', array()),
+			'return' => app_config('return_statuses', array()),
 		);
 
 		$definitions = isset($maps[$map]) ? $maps[$map] : array();

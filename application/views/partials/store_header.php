@@ -34,8 +34,7 @@ $mega_menu = isset($mega_menu) ? $mega_menu : array();
 			</button>
 
 			<a class="store-brand" href="<?php echo site_url(); ?>">
-				<span class="brand-mark"><i class="fa-solid fa-bag-shopping"></i></span>
-				<span class="brand-text"><?php echo html_escape($site_name); ?></span>
+				<img class="brand-logo brand-logo-store" src="<?php echo base_url(array_get($app, 'logo', 'public/assets/images/kupiana-logo-512.png')); ?>" alt="<?php echo html_escape($site_name); ?> logo">
 			</a>
 
 			<form class="header-search flex-grow-1 d-none d-md-block" action="<?php echo site_url('search'); ?>" method="get" role="search">

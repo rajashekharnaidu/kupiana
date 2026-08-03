@@ -1,0 +1,5 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<section class="py-4 border-bottom bg-light"><div class="container"><h1 class="h3 mb-1">Wishlist</h1><p class="text-muted mb-0">Products you saved for later.</p></div></section>
+<section class="py-5"><div class="container"><div class="row g-3">
+	<?php if (empty($products)): ?><div class="col-12"><?php echo empty_state('Your wishlist is empty', 'Save products you want to revisit.', 'fa-heart', array('label' => 'Browse Products', 'url' => site_url('shop'), 'icon' => 'fa-bag-shopping')); ?></div><?php else: foreach ($products as $product): ?><div class="col-6 col-md-4 col-lg-3"><div class="position-relative"><?php $this->load->view('_product_card', array('product' => $product)); ?><a class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2" href="<?php echo site_url('wishlist/remove/'.$product->id); ?>" data-confirm="Remove from wishlist?"><i class="fa-solid fa-xmark"></i></a></div></div><?php endforeach; endif; ?>
+</div></div></section>

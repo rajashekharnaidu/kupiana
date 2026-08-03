@@ -62,8 +62,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 			<div class="col-lg-4">
 				<a class="store-brand mb-3 d-inline-flex" href="<?php echo site_url(); ?>">
-					<span class="brand-mark"><i class="fa-solid fa-bag-shopping"></i></span>
-					<span class="brand-text"><?php echo html_escape($site_name); ?></span>
+					<img class="brand-logo brand-logo-footer" src="<?php echo base_url(array_get($app, 'logo', 'public/assets/images/kupiana-logo-512.png')); ?>" alt="<?php echo html_escape($site_name); ?> logo">
 				</a>
 				<p class="text-muted"><?php echo html_escape(array_get($app, 'tagline', '')); ?></p>
 				<ul class="list-unstyled footer-contact">

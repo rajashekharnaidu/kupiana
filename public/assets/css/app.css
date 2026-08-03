@@ -15,25 +15,66 @@
    ================================================================== */
 
 :root {
-	--k-primary:        #4f46e5;
-	--k-primary-hover:  #4338ca;
-	--k-primary-soft:   rgba(79, 70, 229, .10);
-	--k-secondary:      #64748b;
-	--k-success:        #16a34a;
-	--k-info:           #0ea5e9;
-	--k-warning:        #f59e0b;
-	--k-danger:         #dc2626;
-	--k-dark:           #0f172a;
+	/*
+	| Brand palette ---------------------------------------------------------
+	|
+	| Primary is Kupiana terracotta (#cc4e3a) — the chilli red from the logo.
+	| Everything else is tuned around it rather than left on the stock
+	| blue-grey scale:
+	|
+	|  - Neutrals are warm. A cool slate grey next to terracotta reads dirty;
+	|    these greys carry a little red so surfaces sit under the brand colour.
+	|  - Success is a leaf green taken from the logo's sprig, not emerald.
+	|  - Info is teal, the classic complement to a warm red.
+	|  - Warning is turmeric amber — far enough round the wheel (38 deg vs 8)
+	|    to stay legible beside primary.
+	|  - Danger is a cool crimson ON PURPOSE. A "deeper red" would sit at the
+	|    same hue as primary and become indistinguishable in a 12%-tint badge,
+	|    which is exactly where destructive actions must not be ambiguous.
+	*/
+	--k-primary:        #cc4e3a;
+	--k-primary-hover:  #ae3f2d;
+	--k-primary-dark:   #933425;
+	--k-primary-soft:   rgba(204, 78, 58, .10);
+	--k-primary-rgb:    204, 78, 58;
 
-	--k-bg:             #f5f6fa;
+	/*
+	| Accessible interactive shade.
+	|
+	| White text on the brand #cc4e3a measures 4.45:1 — just under the WCAG AA
+	| threshold of 4.5 for normal text, which button labels and links are.
+	| This is 2% darker (4.95:1) and visually indistinguishable, so it carries
+	| anything with text on it while #cc4e3a stays the brand colour for washes,
+	| borders, gradients and focus rings.
+	|
+	| To use the exact brand hex everywhere instead, set this to #cc4e3a and
+	| accept the 4.45 ratio — it is a one-line change.
+	*/
+	--k-primary-ink:    #c24733;
+	--k-primary-ink-rgb: 194, 71, 51;
+
+	--k-secondary:      #7c6a60;
+	--k-success:        #4b8b3b;
+	--k-success-fill:   #437d35;
+	--k-info:           #0f7d8c;
+	--k-warning:        #d59120;
+	--k-danger:         #a4133c;
+	--k-dark:           #2a1a12;
+
+	/* Readable text tones for the soft-tinted badges. */
+	--k-success-ink:    #386b2c;
+	--k-warning-ink:    #94621a;
+	--k-info-ink:       #0b616d;
+
+	--k-bg:             #faf6f2;
 	--k-surface:        #ffffff;
-	--k-surface-alt:    #f8fafc;
-	--k-border:         #e5e7eb;
-	--k-text:           #111827;
-	--k-text-muted:     #6b7280;
+	--k-surface-alt:    #f6efe8;
+	--k-border:         #e9dfd6;
+	--k-text:           #2c1e16;
+	--k-text-muted:     #7b6a5f;
 
-	--k-sidebar-bg:     #0f172a;
-	--k-sidebar-text:   #94a3b8;
+	--k-sidebar-bg:     #2a1a12;
+	--k-sidebar-text:   #c4ab9c;
 	--k-sidebar-active: #ffffff;
 	--k-sidebar-width:  264px;
 	--k-topbar-height:  64px;
@@ -42,28 +83,63 @@
 	--k-radius:    .75rem;
 	--k-radius-lg: 1rem;
 
-	--k-shadow-sm: 0 1px 2px rgba(16, 24, 40, .05);
-	--k-shadow:    0 4px 16px rgba(16, 24, 40, .08);
-	--k-shadow-lg: 0 12px 32px rgba(16, 24, 40, .12);
+	/* Shadows carry a little brown so they read as warm depth, not grey haze. */
+	--k-shadow-sm: 0 1px 2px rgba(74, 44, 30, .06);
+	--k-shadow:    0 4px 16px rgba(74, 44, 30, .10);
+	--k-shadow-lg: 0 12px 32px rgba(74, 44, 30, .15);
 
 	--k-transition: 200ms cubic-bezier(.4, 0, .2, 1);
 
-	--bs-primary: var(--k-primary);
+	/*
+	| Bootstrap bridge. Utilities such as .text-primary resolve through
+	| --bs-*-rgb, so both the hex and the rgb triplet have to be set or half
+	| the framework stays blue.
+	*/
+	--bs-primary:          var(--k-primary-ink);
+	--bs-primary-rgb:      var(--k-primary-ink-rgb);
+	--bs-secondary:        var(--k-secondary);
+	--bs-secondary-rgb:    124, 106, 96;
+	--bs-success:          var(--k-success);
+	--bs-success-rgb:      75, 139, 59;
+	--bs-info:             var(--k-info);
+	--bs-info-rgb:         15, 125, 140;
+	--bs-warning:          var(--k-warning);
+	--bs-warning-rgb:      213, 145, 32;
+	--bs-danger:           var(--k-danger);
+	--bs-danger-rgb:       164, 19, 60;
+	--bs-dark:             var(--k-dark);
+	--bs-dark-rgb:         42, 26, 18;
+
+	--bs-link-color:       var(--k-primary-ink);
+	--bs-link-color-rgb:   var(--k-primary-ink-rgb);
+	--bs-link-hover-color: var(--k-primary-hover);
+	--bs-focus-ring-color: rgba(204, 78, 58, .25);
+
 	--bs-border-radius: var(--k-radius);
 	--bs-body-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 /* Dark theme. Toggled by app.js writing data-bs-theme on <html>. */
 [data-bs-theme="dark"] {
-	--k-bg:          #0b1120;
-	--k-surface:     #111827;
-	--k-surface-alt: #1f2937;
-	--k-border:      #1f2937;
-	--k-text:        #e5e7eb;
-	--k-text-muted:  #94a3b8;
-	--k-sidebar-bg:  #060b16;
-	--k-shadow:      0 4px 16px rgba(0, 0, 0, .4);
-	--k-shadow-lg:   0 12px 32px rgba(0, 0, 0, .5);
+	/* Warm near-blacks, so the terracotta still looks like terracotta rather
+	   than orange sitting on cold slate. */
+	--k-bg:          #17100b;
+	--k-surface:     #1f1610;
+	--k-surface-alt: #2a1e16;
+	--k-border:      #3a291e;
+	--k-text:        #f2e9e1;
+	--k-text-muted:  #b3a094;
+	--k-sidebar-bg:  #120c08;
+
+	/* Lifted a step: the light-mode tones go muddy on a dark backdrop. */
+	--k-primary:     #e4674f;
+	--k-primary-rgb: 228, 103, 79;
+	--k-success-ink: #86c273;
+	--k-warning-ink: #e0aa4e;
+	--k-info-ink:    #52b6c4;
+
+	--k-shadow:      0 4px 16px rgba(0, 0, 0, .45);
+	--k-shadow-lg:   0 12px 32px rgba(0, 0, 0, .55);
 }
 
 /* ==================================================================
@@ -78,8 +154,12 @@ body {
 	-webkit-font-smoothing: antialiased;
 }
 
-a { color: var(--k-primary); text-decoration: none; transition: color var(--k-transition); }
+/* Link text is small, so it uses the AA-safe shade rather than raw brand. */
+a { color: var(--k-primary-ink); text-decoration: none; transition: color var(--k-transition); }
 a:hover { color: var(--k-primary-hover); }
+
+/* On dark surfaces the ink is too heavy — fall back to the lifted brand tone. */
+[data-bs-theme="dark"] a { color: var(--k-primary); }
 
 h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 
@@ -109,9 +189,114 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 .card-body { padding: 1.25rem; }
 
 .btn { border-radius: var(--k-radius-sm); font-weight: 500; transition: all var(--k-transition); }
-.btn-primary { background: var(--k-primary); border-color: var(--k-primary); }
-.btn-primary:hover, .btn-primary:focus { background: var(--k-primary-hover); border-color: var(--k-primary-hover); }
 .btn:active { transform: translateY(1px); }
+
+/*
+| Bootstrap button variants ---------------------------------------------------
+|
+| Bootstrap 5.3 compiles .btn-* and .btn-outline-* to LITERAL hex through Sass,
+| not through --bs-primary, so overriding the custom properties above is not
+| enough — without this block the ~100 buttons in the views stay Bootstrap blue.
+| Each variant is re-declared through its own --bs-btn-* API so hover, active,
+| focus and disabled states all follow.
+*/
+.btn-primary {
+	--bs-btn-bg: var(--k-primary-ink);
+	--bs-btn-border-color: var(--k-primary-ink);
+	--bs-btn-hover-bg: var(--k-primary-hover);
+	--bs-btn-hover-border-color: var(--k-primary-hover);
+	--bs-btn-active-bg: var(--k-primary-dark);
+	--bs-btn-active-border-color: var(--k-primary-dark);
+	--bs-btn-disabled-bg: var(--k-primary-ink);
+	--bs-btn-disabled-border-color: var(--k-primary-ink);
+	--bs-btn-focus-shadow-rgb: var(--k-primary-rgb);
+}
+.btn-outline-primary {
+	--bs-btn-color: var(--k-primary-ink);
+	--bs-btn-border-color: var(--k-primary);
+	--bs-btn-hover-bg: var(--k-primary-ink);
+	--bs-btn-hover-border-color: var(--k-primary-ink);
+	--bs-btn-active-bg: var(--k-primary-hover);
+	--bs-btn-active-border-color: var(--k-primary-hover);
+	--bs-btn-disabled-color: var(--k-primary-ink);
+	--bs-btn-disabled-border-color: var(--k-primary);
+	--bs-btn-focus-shadow-rgb: var(--k-primary-rgb);
+}
+.btn-outline-secondary {
+	--bs-btn-color: var(--k-text);
+	--bs-btn-border-color: var(--k-border);
+	--bs-btn-hover-color: var(--k-text);
+	--bs-btn-hover-bg: var(--k-surface-alt);
+	--bs-btn-hover-border-color: var(--k-secondary);
+	--bs-btn-active-color: var(--k-text);
+	--bs-btn-active-bg: var(--k-surface-alt);
+	--bs-btn-active-border-color: var(--k-secondary);
+	--bs-btn-disabled-color: var(--k-text-muted);
+	--bs-btn-disabled-border-color: var(--k-border);
+	--bs-btn-focus-shadow-rgb: 124, 106, 96;
+}
+.btn-danger {
+	--bs-btn-bg: var(--k-danger);
+	--bs-btn-border-color: var(--k-danger);
+	--bs-btn-hover-bg: #870f31;
+	--bs-btn-hover-border-color: #870f31;
+	--bs-btn-active-bg: #6f0c28;
+	--bs-btn-active-border-color: #6f0c28;
+	--bs-btn-disabled-bg: var(--k-danger);
+	--bs-btn-disabled-border-color: var(--k-danger);
+	--bs-btn-focus-shadow-rgb: 164, 19, 60;
+}
+.btn-outline-danger {
+	--bs-btn-color: var(--k-danger);
+	--bs-btn-border-color: var(--k-danger);
+	--bs-btn-hover-bg: var(--k-danger);
+	--bs-btn-hover-border-color: var(--k-danger);
+	--bs-btn-active-bg: #870f31;
+	--bs-btn-active-border-color: #870f31;
+	--bs-btn-disabled-color: var(--k-danger);
+	--bs-btn-disabled-border-color: var(--k-danger);
+	--bs-btn-focus-shadow-rgb: 164, 19, 60;
+}
+.btn-success {
+	--bs-btn-bg: var(--k-success-fill);
+	--bs-btn-border-color: var(--k-success-fill);
+	--bs-btn-hover-bg: #3d7530;
+	--bs-btn-hover-border-color: #3d7530;
+	--bs-btn-focus-shadow-rgb: 75, 139, 59;
+}
+.btn-dark {
+	--bs-btn-bg: var(--k-dark);
+	--bs-btn-border-color: var(--k-dark);
+	--bs-btn-hover-bg: #1c110b;
+	--bs-btn-hover-border-color: #1c110b;
+	--bs-btn-focus-shadow-rgb: 42, 26, 18;
+}
+.btn-light {
+	--bs-btn-bg: var(--k-surface-alt);
+	--bs-btn-border-color: var(--k-border);
+	--bs-btn-color: var(--k-text);
+	--bs-btn-hover-bg: var(--k-border);
+	--bs-btn-hover-border-color: var(--k-secondary);
+	--bs-btn-hover-color: var(--k-text);
+}
+.btn-link { --bs-btn-color: var(--k-primary); --bs-btn-hover-color: var(--k-primary-hover); }
+
+/* Alerts are compiled the same way. */
+.alert-danger  { --bs-alert-color: #7d0e2d; --bs-alert-bg: rgba(164, 19, 60, .10); --bs-alert-border-color: rgba(164, 19, 60, .24); }
+.alert-warning { --bs-alert-color: var(--k-warning-ink); --bs-alert-bg: rgba(213, 145, 32, .12); --bs-alert-border-color: rgba(213, 145, 32, .28); }
+.alert-success { --bs-alert-color: var(--k-success-ink); --bs-alert-bg: rgba(75, 139, 59, .12); --bs-alert-border-color: rgba(75, 139, 59, .26); }
+.alert-info    { --bs-alert-color: var(--k-info-ink); --bs-alert-bg: rgba(15, 125, 140, .10); --bs-alert-border-color: rgba(15, 125, 140, .24); }
+.alert-light   { --bs-alert-color: var(--k-text); --bs-alert-bg: var(--k-surface-alt); --bs-alert-border-color: var(--k-border); }
+
+/* Remaining framework bits that hardcode the old accent. */
+.form-check-input:checked { background-color: var(--k-primary); border-color: var(--k-primary); }
+.form-check-input:focus   { border-color: var(--k-primary); box-shadow: 0 0 0 .25rem var(--k-primary-soft); }
+.progress                 { --bs-progress-bar-bg: var(--k-primary); background: var(--k-surface-alt); }
+.dropdown-item.active,
+.dropdown-item:active     { background-color: var(--k-primary); }
+.nav-pills                { --bs-nav-pills-link-active-bg: var(--k-primary); }
+.list-group               { --bs-list-group-active-bg: var(--k-primary); --bs-list-group-active-border-color: var(--k-primary); }
+.accordion                { --bs-accordion-active-color: var(--k-primary); --bs-accordion-active-bg: var(--k-primary-soft); --bs-accordion-btn-focus-box-shadow: 0 0 0 .25rem var(--k-primary-soft); }
 
 .btn-icon {
 	width: 38px; height: 38px;
@@ -120,20 +305,28 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 }
 
 .badge-soft { font-weight: 500; padding: .35em .7em; border-radius: 999px; }
-.badge-soft-primary   { background: rgba(79, 70, 229, .12);  color: var(--k-primary); }
-.badge-soft-success   { background: rgba(22, 163, 74, .12);  color: var(--k-success); }
-.badge-soft-danger    { background: rgba(220, 38, 38, .12);  color: var(--k-danger); }
-.badge-soft-warning   { background: rgba(245, 158, 11, .15); color: #b45309; }
-.badge-soft-info      { background: rgba(14, 165, 233, .12); color: var(--k-info); }
-.badge-soft-secondary { background: rgba(100, 116, 139, .12); color: var(--k-secondary); }
-.badge-soft-dark      { background: rgba(15, 23, 42, .10);   color: var(--k-dark); }
+.badge-soft-primary   { background: rgba(204, 78, 58, .13);  color: var(--k-primary-dark, var(--k-primary)); }
+.badge-soft-success   { background: rgba(75, 139, 59, .14);  color: var(--k-success-ink); }
+.badge-soft-danger    { background: rgba(164, 19, 60, .12);  color: var(--k-danger); }
+.badge-soft-warning   { background: rgba(213, 145, 32, .16); color: var(--k-warning-ink); }
+.badge-soft-info      { background: rgba(15, 125, 140, .13); color: var(--k-info-ink); }
+.badge-soft-secondary { background: rgba(124, 106, 96, .14); color: #78675d; }
+.badge-soft-dark      { background: rgba(42, 26, 18, .10);   color: var(--k-dark); }
 
-.bg-soft-primary   { background: rgba(79, 70, 229, .12);  color: var(--k-primary); }
-.bg-soft-success   { background: rgba(22, 163, 74, .12);  color: var(--k-success); }
-.bg-soft-danger    { background: rgba(220, 38, 38, .12);  color: var(--k-danger); }
-.bg-soft-warning   { background: rgba(245, 158, 11, .15); color: #b45309; }
-.bg-soft-info      { background: rgba(14, 165, 233, .12); color: var(--k-info); }
-.bg-soft-secondary { background: rgba(100, 116, 139, .12); color: var(--k-secondary); }
+.bg-soft-primary   { background: rgba(204, 78, 58, .13);  color: var(--k-primary-dark, var(--k-primary)); }
+.bg-soft-success   { background: rgba(75, 139, 59, .14);  color: var(--k-success-ink); }
+.bg-soft-danger    { background: rgba(164, 19, 60, .12);  color: var(--k-danger); }
+.bg-soft-warning   { background: rgba(213, 145, 32, .16); color: var(--k-warning-ink); }
+.bg-soft-info      { background: rgba(15, 125, 140, .13); color: var(--k-info-ink); }
+.bg-soft-secondary { background: rgba(124, 106, 96, .14); color: #78675d; }
+
+/* On the dark theme a 13% tint of a mid-tone disappears; lift both the wash
+   and the ink so soft badges keep their contrast. */
+[data-bs-theme="dark"] .badge-soft-primary,
+[data-bs-theme="dark"] .bg-soft-primary   { background: rgba(228, 103, 79, .20); color: #f0917c; }
+[data-bs-theme="dark"] .badge-soft-danger,
+[data-bs-theme="dark"] .bg-soft-danger    { background: rgba(164, 19, 60, .26);  color: #eb7f9d; }
+[data-bs-theme="dark"] .badge-soft-dark   { background: rgba(255, 255, 255, .10); color: var(--k-text); }
 
 .form-control, .form-select {
 	border-radius: var(--k-radius-sm);
@@ -205,8 +398,8 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 	background: var(--k-surface);
 }
 .pagination .page-item.active .page-link {
-	background: var(--k-primary);
-	border-color: var(--k-primary);
+	background: var(--k-primary-ink);
+	border-color: var(--k-primary-ink);
 	color: #fff;
 }
 
@@ -258,7 +451,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 	width: 60px; height: 60px; margin: 0 auto;
 	display: flex; align-items: center; justify-content: center;
 	border-radius: 50%;
-	background: rgba(220, 38, 38, .12);
+	background: rgba(164, 19, 60, .12);
 	color: var(--k-danger);
 	font-size: 1.5rem;
 }
@@ -270,7 +463,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 	background: rgba(255, 255, 255, .7);
 	backdrop-filter: blur(2px);
 }
-[data-bs-theme="dark"] .loading-overlay { background: rgba(11, 17, 32, .7); }
+[data-bs-theme="dark"] .loading-overlay { background: rgba(23, 16, 11, .72); }
 .loading-overlay.is-active { display: flex; }
 
 /* ==================================================================
@@ -309,10 +502,47 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 	background: var(--k-primary);
 	color: #fff;
 }
+.brand-logo {
+	display: block;
+	object-fit: contain;
+	max-width: 100%;
+}
+.brand-logo-store {
+	width: 86px;
+	height: 86px;
+}
+.brand-logo-admin {
+	width: 54px;
+	height: 54px;
+	filter: drop-shadow(0 8px 18px rgba(0, 0, 0, .24));
+}
+.brand-logo-footer {
+	width: 116px;
+	height: 116px;
+}
+.brand-logo-auth {
+	width: 112px;
+	height: 112px;
+	object-fit: contain;
+}
 .sidebar-close { color: var(--k-sidebar-text); }
 
 .sidebar-nav { flex: 1; overflow-y: auto; padding: .75rem 0 1rem; }
 .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .12); }
+
+.dashboard-brand-card {
+	overflow: hidden;
+	background:
+		radial-gradient(circle at 12% 25%, rgba(204, 78, 58, .12), transparent 34%),
+		radial-gradient(circle at 88% 80%, rgba(75, 139, 59, .10), transparent 36%),
+		linear-gradient(135deg, #fff, #f9f2ea);
+}
+.dashboard-brand-logo {
+	width: 120px;
+	height: 120px;
+	object-fit: contain;
+	flex: 0 0 auto;
+}
 
 .sidebar-heading {
 	padding: 1rem 1.5rem .4rem;
@@ -320,7 +550,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: .08em;
-	color: rgba(148, 163, 184, .6);
+	color: rgba(196, 171, 156, .62);
 }
 
 .admin-sidebar .nav-link {
@@ -338,7 +568,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 }
 .admin-sidebar .nav-link.active {
 	color: var(--k-sidebar-active);
-	background: rgba(79, 70, 229, .18);
+	background: rgba(204, 78, 58, .22);
 	border-left-color: var(--k-primary);
 }
 .nav-icon { width: 18px; text-align: center; font-size: .95rem; }
@@ -361,7 +591,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 .sidebar-backdrop {
 	display: none;
 	position: fixed; inset: 0; z-index: 1035;
-	background: rgba(15, 23, 42, .5);
+	background: rgba(42, 26, 18, .55);
 }
 .sidebar-backdrop.is-visible { display: block; }
 
@@ -409,7 +639,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 	width: 36px; height: 36px; flex-shrink: 0;
 	display: inline-flex; align-items: center; justify-content: center;
 	border-radius: 50%;
-	background: var(--k-primary); color: #fff;
+	background: var(--k-primary-ink); color: #fff;
 	font-weight: 600; font-size: .875rem;
 }
 .profile-name { display: block; font-size: .8125rem; font-weight: 600; line-height: 1.2; }
@@ -457,6 +687,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 .store-brand {
 	display: inline-flex; align-items: center; gap: .6rem;
 	font-weight: 700; font-size: 1.25rem; color: var(--k-text);
+	flex-shrink: 0;
 }
 .store-brand:hover { color: var(--k-primary); }
 
@@ -535,6 +766,16 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 .mega-col ul a:hover { color: var(--k-primary); }
 
 .store-main { min-height: 50vh; }
+.store-body .container {
+	width: 100%;
+	max-width: none;
+	padding-left: clamp(1rem, 2.5vw, 3rem);
+	padding-right: clamp(1rem, 2.5vw, 3rem);
+}
+.store-body .container-fluid {
+	padding-left: clamp(1rem, 2.5vw, 3rem) !important;
+	padding-right: clamp(1rem, 2.5vw, 3rem) !important;
+}
 
 /* Product card — used across home, shop, category, related */
 .product-card {
@@ -592,7 +833,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 .trust-item strong { display: block; font-size: .9375rem; }
 .trust-item span { font-size: .8125rem; color: var(--k-text-muted); }
 
-.newsletter-band { background: var(--k-primary); color: #fff; padding: 2.5rem 0; }
+.newsletter-band { background: var(--k-primary-ink); color: #fff; padding: 2.5rem 0; }
 .newsletter-band .form-control { border: none; }
 
 .store-footer { background: var(--k-surface); border-top: 1px solid var(--k-border); padding: 3rem 0 1.5rem; }
@@ -675,6 +916,10 @@ img[loading="lazy"] { background: var(--k-surface-alt); }
 	.stat-value { font-size: 1.25rem; }
 	.admin-topbar { padding: 0 1rem; }
 	.k-toast { min-width: auto; width: calc(100vw - 2rem); }
+	.brand-logo-store { width: 68px; height: 68px; }
+	.brand-logo-footer,
+	.brand-logo-auth,
+	.dashboard-brand-logo { width: 92px; height: 92px; }
 }
 
 @media print {

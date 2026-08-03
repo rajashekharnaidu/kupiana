@@ -14,9 +14,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /* Brand ---------------------------------------------------------------- */
 $config['app'] = array(
 	'name'        => 'Kupiana',
-	'tagline'     => 'Curated commerce, delivered.',
+	'tagline'     => 'Organic spices and oils, delivered.',
 	'version'     => '1.0.0',
-	'logo'        => 'public/assets/images/logo.svg',
+	'logo'        => 'public/assets/images/kupiana-logo-512.png',
 	'favicon'     => 'public/assets/images/favicon.png',
 	'support_email' => 'support@kupiana.test',
 	'support_phone' => '+91 00000 00000',
@@ -99,6 +99,27 @@ $config['payment_methods'] = array(
 	'cod'      => 'Cash on Delivery',
 	'wallet'   => 'Wallet',
 	'bank_transfer' => 'Bank Transfer',
+);
+
+$config['shipment_statuses'] = array(
+	'pending' => array('label' => 'Pending', 'badge' => 'secondary'),
+	'packed' => array('label' => 'Packed', 'badge' => 'primary'),
+	'picked_up' => array('label' => 'Picked Up', 'badge' => 'info'),
+	'in_transit' => array('label' => 'In Transit', 'badge' => 'info'),
+	'out_for_delivery' => array('label' => 'Out for Delivery', 'badge' => 'info'),
+	'delivered' => array('label' => 'Delivered', 'badge' => 'success'),
+	'failed' => array('label' => 'Failed Attempt', 'badge' => 'danger'),
+	'returned' => array('label' => 'Returned', 'badge' => 'warning'),
+);
+
+$config['return_statuses'] = array(
+	'requested' => array('label' => 'Requested', 'badge' => 'secondary'),
+	'approved' => array('label' => 'Approved', 'badge' => 'info'),
+	'rejected' => array('label' => 'Rejected', 'badge' => 'danger'),
+	'picked_up' => array('label' => 'Picked Up', 'badge' => 'info'),
+	'received' => array('label' => 'Received', 'badge' => 'primary'),
+	'completed' => array('label' => 'Completed', 'badge' => 'success'),
+	'cancelled' => array('label' => 'Cancelled', 'badge' => 'dark'),
 );
 
 /* Generic record statuses ---------------------------------------------- */

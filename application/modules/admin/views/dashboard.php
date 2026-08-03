@@ -4,9 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Admin dashboard.
  *
- * Phase 1: renders the shell and the reusable components (stat cards, chart
- * canvases, table cards, empty states) so the design system is verifiable.
- * Phase 4 swaps the placeholder values for live model data.
+ * Live dashboard aggregates and reusable chart/table components.
  */
 ?>
 
@@ -19,14 +17,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	)
 ); ?>
 
-<div class="alert alert-info d-flex align-items-start gap-3" role="alert">
-	<i class="fa-solid fa-circle-info mt-1"></i>
-	<div>
-		<strong>Phase 1 complete — architecture only.</strong>
-		<div class="small">
-			These tiles show placeholder values. Live figures arrive in Phase 4, once the
-			Phase 2 schema and Phase 3 authentication are in place. See
-			<code>PROJECT_STATUS.md</code> for the build plan.
+<div class="card dashboard-brand-card mb-4">
+	<div class="card-body d-flex flex-wrap align-items-center gap-3">
+		<img class="dashboard-brand-logo" src="<?php echo base_url(array_get($app, 'logo', 'public/assets/images/kupiana-logo-512.png')); ?>" alt="<?php echo html_escape($site_name); ?> logo">
+		<div>
+			<h2 class="h5 mb-1"><?php echo html_escape($site_name); ?> Command Center</h2>
+			<p class="text-muted mb-0"><?php echo html_escape(array_get($app, 'tagline', 'Curated commerce, delivered.')); ?></p>
 		</div>
 	</div>
 </div>
@@ -35,10 +31,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div class="row g-3 mb-4">
 	<?php
 	$tiles = array(
-		array('Total Revenue',  money_compact(0), 'fa-indian-rupee-sign', 'primary', 0),
-		array("Today's Sales",  money_compact(0), 'fa-cart-shopping',     'success', 0),
-		array('Total Orders',   '0',              'fa-receipt',           'info',    0),
-		array('Total Customers','0',              'fa-users',             'warning', 0),
+		array('Total Revenue',  money_compact($kpis['revenue']), 'fa-indian-rupee-sign', 'primary', 0),
+		array("Today's Sales",  money_compact($kpis['today']), 'fa-cart-shopping',     'success', 0),
+		array('Total Orders',   number_format($kpis['orders']), 'fa-receipt',           'info',    0),
+		array('Total Customers',number_format($kpis['customers']), 'fa-users',          'warning', 0),
 	);
 
 	foreach ($tiles as $tile): ?>
@@ -50,11 +46,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 <div class="row g-3 mb-4">
 	<?php
+	$status_map = array(); foreach ($kpis['status_counts'] as $status_row) { $status_map[$status_row['status']] = $status_row['total']; }
 	$secondary = array(
-		array('Pending Orders',   '0', 'fa-clock',         'secondary'),
-		array('Delivered',        '0', 'fa-circle-check',  'success'),
-		array('Cancelled',        '0', 'fa-ban',           'danger'),
-		array('Low Stock Items',  '0', 'fa-triangle-exclamation', 'warning'),
+		array('Pending Orders',   number_format(isset($status_map['pending']) ? $status_map['pending'] : 0), 'fa-clock',         'secondary'),
+		array('Delivered',        number_format(isset($status_map['delivered']) ? $status_map['delivered'] : 0), 'fa-circle-check',  'success'),
+		array('Cancelled',        number_format(isset($status_map['cancelled']) ? $status_map['cancelled'] : 0), 'fa-ban',           'danger'),
+		array('Low Stock Items',  number_format($kpis['low_stock']), 'fa-triangle-exclamation', 'warning'),
 	);
 
 	foreach ($secondary as $tile): ?>
@@ -160,20 +157,21 @@ document.addEventListener('DOMContentLoaded', function () {
 	if (typeof Chart === 'undefined') { return; }
 
 	var styles = getComputedStyle(document.documentElement);
-	var primary = styles.getPropertyValue('--k-primary').trim() || '#4f46e5';
-	var muted   = styles.getPropertyValue('--k-text-muted').trim() || '#6b7280';
-	var border  = styles.getPropertyValue('--k-border').trim() || '#e5e7eb';
+	var primary = styles.getPropertyValue('--k-primary').trim() || '#cc4e3a';
+	var muted   = styles.getPropertyValue('--k-text-muted').trim() || '#7b6a5f';
+	var border  = styles.getPropertyValue('--k-border').trim() || '#e9dfd6';
 
 	var revenueEl = document.getElementById('revenueChart');
+	var revenueChart = null;
 
 	if (revenueEl) {
 		var ctx = revenueEl.getContext('2d');
 		var fill = ctx.createLinearGradient(0, 0, 0, 260);
 
-		fill.addColorStop(0, 'rgba(79, 70, 229, .25)');
-		fill.addColorStop(1, 'rgba(79, 70, 229, 0)');
+		fill.addColorStop(0, 'rgba(204, 78, 58, .28)');
+		fill.addColorStop(1, 'rgba(204, 78, 58, 0)');
 
-		new Chart(ctx, {
+		revenueChart = new Chart(ctx, {
 			type: 'line',
 			data: {
 				labels: [],
@@ -212,6 +210,16 @@ document.addEventListener('DOMContentLoaded', function () {
 				}
 			}
 		});
+		if (typeof Kupiana !== 'undefined') {
+			Kupiana.ajax({ url: <?php echo json_encode(site_url('admin/dashboard/chart_data')); ?>, method: 'GET', silent: true })
+				.then(function (response) {
+					if (revenueChart && response.data) {
+						revenueChart.data.labels = response.data.labels;
+						revenueChart.data.datasets[0].data = response.data.revenue;
+						revenueChart.update();
+					}
+				});
+		}
 	}
 
 	var statusEl = document.getElementById('statusChart');
@@ -222,8 +230,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			data: {
 				labels: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
 				datasets: [{
-					data: [0, 0, 0, 0, 0],
-					backgroundColor: ['#94a3b8', '#4f46e5', '#0ea5e9', '#16a34a', '#dc2626'],
+				data: [<?php echo (int) (isset($status_map['pending']) ? $status_map['pending'] : 0); ?>, <?php echo (int) (isset($status_map['processing']) ? $status_map['processing'] : 0); ?>, <?php echo (int) (isset($status_map['shipped']) ? $status_map['shipped'] : 0); ?>, <?php echo (int) (isset($status_map['delivered']) ? $status_map['delivered'] : 0); ?>, <?php echo (int) (isset($status_map['cancelled']) ? $status_map['cancelled'] : 0); ?>],
+					backgroundColor: ['#b6a79d', '#cc4e3a', '#0f7d8c', '#4b8b3b', '#a4133c'],
 					borderWidth: 0
 				}]
 			},

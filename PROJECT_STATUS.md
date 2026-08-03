@@ -7,7 +7,7 @@
 - **Project:** Kupiana — Enterprise E-Commerce Application
 - **Stack:** PHP 8.x, CodeIgniter 3.1.13 (HMVC), MySQL (mysqli), Bootstrap 5, jQuery, AJAX
 - **Repo root:** `/Users/techmonster/Documents/UMS/kupiana`
-- **Last updated:** 2026-08-02 (Phase 3 complete)
+- **Last updated:** 2026-08-03 (terracotta theme #cc4e3a)
 
 ---
 
@@ -49,16 +49,500 @@
 | 1 | Project Architecture | **DONE** |
 | 2 | Database Design | **DONE** |
 | 3 | Authentication | **DONE** |
-| 4 | Admin Panel (50 modules) | TODO |
-| 5 | Customer Website | TODO |
-| 6 | Inventory | TODO |
-| 7 | Orders | TODO |
-| 8 | Payments (Razorpay) | TODO |
-| 9 | Tracking | TODO |
-| 10 | Reports | TODO |
-| 11 | Testing | TODO |
-| 12 | Optimization | TODO |
-| 13 | Deployment | TODO |
+| 4 | Admin Panel (50 modules) | **DONE** |
+| 5 | Customer Website | **DONE** |
+| 6 | Inventory | **DONE** |
+| 7 | Orders | **DONE** |
+| 8 | Payments (Razorpay) | **DONE** |
+| 9 | Tracking | **DONE** |
+| 10 | Reports | **DONE** |
+| 11 | Testing | **DONE** |
+| 12 | Optimization | **DONE** |
+| 13 | Deployment | **DONE** |
+
+---
+
+## Phase 4 — Admin Panel — DONE
+
+### Delivered so far
+
+- Generic, permission-gated admin CRUD foundation for catalog, sales, inventory,
+  people, CMS, SEO, notifications and system resources.
+- Shared listing and form screens with search, sorting, pagination, status filters,
+  bulk actions, validation, soft delete and CSV export.
+- Dynamic form widgets for relations, enums, boolean flags, long text, dates and
+  image upload fields.
+- Live admin dashboard KPIs and AJAX chart data.
+- Inventory submenu routes for stock movements, adjustments and low-stock views.
+- Order detail page with items, totals, payments, shipments, invoices, refunds and
+  status timeline.
+- Transactional order status updates with order status history and audit logging.
+- Dedicated stock-in, stock-out and stock-adjustment forms that validate requests,
+  update inventory balances, record stock movements and roll product stock totals.
+- Grouped settings editor for general, shipping, payment, tax, inventory, catalog,
+  SEO, mail and security settings.
+- Read-only report pages for sales, revenue, GST, customers, inventory, products,
+  suppliers and estimated profit.
+
+### Verification
+
+- Full PHP lint passed for every file under `application/`.
+- Authenticated admin smoke tests passed for dashboard, generic resources, product
+  management, order operations, inventory transactions, grouped settings, reports,
+  backups and audit logs.
+- Customer access to admin remains forbidden.
+- No database schema changes were made in Phase 4.
+
+---
+
+## Phase 5 — Customer Website — DONE
+
+### Delivered so far
+
+- Storefront catalog model for reusable product, category, brand, banner, offer,
+  testimonial, cart and wishlist reads.
+- Live homepage with categories, featured products, trending products and trust
+  messaging.
+- Shop/search/category/brand/deals/offers browsing with filters, sorting and
+  pagination.
+- Product detail page with gallery, variants, pricing, stock status, structured
+  product JSON-LD, add-to-cart and wishlist actions.
+- Database-backed cart for guests and signed-in users, with add/update/remove and
+  subtotal/shipping summary.
+- Wishlist page with signed-in database storage and guest session fallback.
+- Customer account dashboard, order list/detail and address book save/delete.
+- Header mega-menu from live category data and live search suggestions API.
+- Customer profile editing, password change and remembered-device revocation.
+- Contact page with CSRF-protected persistence into `contact_messages`.
+- Guest order tracking lookup by order number plus email/phone, including shipment
+  and timeline display when order data exists.
+- Content/utility pages for contact, track order, blog and checkout handoff.
+
+### Verification
+
+- Full PHP lint passed for every file under `application/`.
+- Public storefront smoke tests passed for `/`, `/shop`, `/search`, `/deals`,
+  `/offers`, `/brands`, `/brand/aurex`, `/category/electronics`, a product detail
+  page, `/cart`, `/wishlist`, `/contact`, `/track-order`, `/blog`, `/checkout`
+  and `/api/search/suggest`.
+- Customer login smoke test passed with `user@kupiana.test`; account routes passed
+  for dashboard, profile, security, orders and addresses.
+- CSRF-protected contact POST was verified and created a test message row.
+- No database schema changes were made in Phase 5.
+
+### Deferred intentionally to later phases
+
+- Checkout address/payment/order creation remains a handoff placeholder until
+  Phases 7 and 8.
+- Full payment, fulfilment and delivery tracking automation remain in Phases 8 and 9.
+
+---
+
+## Phase 6 — Inventory — DONE
+
+### Delivered
+
+- Dedicated `Inventory_model` as the single stock-writing gateway for direct stock
+  movements, adjustments and purchase receipts.
+- Custom admin stock overview at `/admin/inventory` with KPIs for on-hand units,
+  available stock, low-stock rows and stock valuation.
+- Searchable/filterable warehouse stock balances with product, SKU, variant,
+  warehouse, reserved quantity, available quantity, reorder level and stock state.
+- Low-stock view using each row's `reorder_level` instead of a hardcoded threshold.
+- CSV export for current stock balance filters.
+- Direct stock-in, stock-out and stock-adjustment workflows backed by signed
+  `stock_movements` ledger rows.
+- Atomic adjustment headers: `stock_adjustments` rows are created inside the same
+  transaction as the stock ledger entry.
+- Purchase entry workflow at `/admin/purchases/create` with supplier, receiving
+  warehouse, purchase lines, totals and tax/discount math.
+- Purchase detail/receive workflow at `/admin/purchases/view/{id}` and
+  `/admin/purchases/receive/{id}`.
+- Purchase receipt now creates batch rows when a batch number is supplied, updates
+  item received quantities, updates `purchase_orders.receive_status`, appends
+  purchase-type stock movements and rolls stock totals into products/variants.
+- Purchase list action now links to the receive/detail screen.
+
+### Verification
+
+- Full PHP lint passed for every file under `application/`.
+- Authenticated admin route smoke passed for stock overview, low stock, stock in,
+  stock out, adjustments, purchase list/create/detail, suppliers and warehouses.
+- Inventory CSV export returned 200 with a downloadable response.
+- CSRF-protected stock-in POST created a stock movement and updated inventory/product
+  rollups.
+- Excessive stock-out POST was rejected without taking stock below zero.
+- CSRF-protected purchase create POST created a purchase order and item line.
+- CSRF-protected purchase receive POST marked the purchase received, created a batch,
+  added a purchase stock movement and updated inventory/product rollups.
+- CSRF-protected adjustment POST created a linked adjustment header and signed stock
+  movement atomically.
+- No database schema changes were made in Phase 6.
+
+### Bugs found and fixed
+
+- Purchase-specific routes were shadowed by the generic admin CRUD route; moved the
+  purchase routes above generic catch-alls.
+- `random_token()` was referenced in new inventory code, but the project helper is
+  `generate_token()`; corrected before final verification.
+
+### Carried forward
+
+- Order checkout and fulfilment will consume these inventory APIs in Phase 7.
+- Payment-aware purchase accounting remains out of scope until payment/reporting
+  phases.
+
+---
+
+## Phase 7 — Orders — DONE
+
+### Delivered
+
+- Dedicated `Order_model` as the order-writing gateway for checkout, stock
+  reservation, fulfilment, cancellation, shipment creation and status history.
+- Real COD checkout at `/checkout` with customer/contact/address capture,
+  CSRF-protected order placement and order success page.
+- Cart-to-order conversion creates `orders`, `order_items` and initial
+  `order_status_history` rows, clears cart items and snapshots billing/shipping
+  addresses as JSON.
+- Order totals now include item subtotal, default GST/tax calculation, CGST/SGST
+  or IGST split by state code and free/flat shipping.
+- Stock is reserved when the order is placed, released on cancellation and converted
+  into signed `sale` stock movements when the order is packed/shipped/fulfilled.
+- Admin order status updates now delegate lifecycle side effects to `Order_model`.
+- Packing/fulfilment creates a shipment row and marks order items fulfilled.
+- Invoice generation remains available from admin order detail and customer-safe
+  invoice viewing is available from account order detail.
+- Customer order detail now shows item fulfilment, timeline comments, shipments,
+  invoices and self-cancel while the order is still cancellable.
+- Guest/customer track-order lookup works against real Phase 7 orders.
+
+### Verification
+
+- Full PHP lint passed for every file under `application/`.
+- Customer cart → checkout → COD order placement passed with CSRF.
+- Created order was verified in DB with order item, totals, address snapshots,
+  pending status and initial timeline.
+- Stock reservation was verified: inventory quantity stayed unchanged and
+  `reserved_quantity` increased at order placement.
+- Admin status update to `packed` was verified: item fulfilled, inventory quantity
+  decremented, reservation cleared, sale stock movement created and shipment row
+  created.
+- Invoice generation created an invoice row and both admin/customer invoice views
+  returned 200.
+- Customer cancellation was verified on a separate pending order: status changed to
+  cancelled, history was appended, reservation was released and no sale movement
+  was created.
+- Route smoke passed for checkout success, account orders/detail/invoice,
+  track-order, admin orders/detail/invoice and shipments.
+- No database schema changes were made in Phase 7.
+
+### Carried forward
+
+- Razorpay payment creation/capture/refund flows remain Phase 8.
+- Courier tracking webhooks and return logistics were completed in Phase 9.
+
+---
+
+## Phase 8 — Payments (Razorpay) — DONE
+
+### Delivered
+
+- Dedicated `Payment_model` for payment lifecycle writes, gateway lookup, capture,
+  failure handling and immutable payment log entries.
+- Razorpay gateway library with settings/env-backed credentials, order creation,
+  Checkout signature verification and webhook signature verification.
+- Customer Razorpay flow at `/payments/razorpay/pay/{order_id}` with pending-payment
+  reuse, gateway-order attachment and success/failure redirects.
+- Local offline Razorpay simulator for development when Razorpay is disabled or keys
+  are missing, keeping the checkout path testable without live credentials.
+- Razorpay Checkout callback endpoint that marks verified payments captured, updates
+  parent order payment totals/status and logs the event.
+- CSRF-excluded Razorpay webhook endpoint for signed `payment.captured` and
+  `payment.failed` events, with invalid-signature rejection.
+- Checkout now supports COD and Razorpay; Razorpay orders redirect to the payment
+  page after order placement.
+- Customer order success and account order detail screens expose `Pay Now` only for
+  Razorpay payments still pending or failed.
+- Admin payment detail screen with payment metadata, related order link, gateway
+  identifiers, captured response payload, event logs and refund form.
+- Admin manual capture/refund actions for operational support, including refund rows,
+  order refunded totals and payment/order status updates.
+- Generic admin payment listing now links each payment row to the dedicated payment
+  detail screen.
+- `payments.status` remains reserved for gateway status; admin generic lifecycle
+  operations use `payments.status_flag` instead.
+
+### Verification
+
+- Full PHP lint passed for every file under `application/`.
+- Customer cart → checkout with Razorpay → local offline simulator capture passed.
+- Captured Razorpay test order was verified through customer success and account
+  order detail pages.
+- Payment capture updated the order as paid and created `order.create` plus
+  `payment.captured` log entries.
+- Admin payment list, payment detail and payment logs routes returned 200.
+- Admin refund POST created a completed refund record, moved the payment/order into
+  partially-refunded state and appended `refund.completed`.
+- Invalid Razorpay webhook signature returned 400 and logged receipt without marking
+  the payment captured.
+- Regression smoke verified partially-refunded orders cannot re-enter payment and no
+  longer show `Pay Now` on success/account order screens.
+- No database schema changes were made in Phase 8.
+
+### Carried forward
+
+- Live Razorpay settlement/refund API calls should be enabled once production keys
+  and webhook secret are configured.
+- Courier shipment automation, tracking webhooks and return logistics remain Phase 9.
+
+---
+
+## Phase 9 — Tracking — DONE
+
+### Delivered
+
+- Dedicated `Tracking_model` for shipment dashboards, courier assignment, tracking
+  events, unified customer timelines and return logistics.
+- Shipment and return status maps in app config, plus badge rendering support for
+  `shipment` and `return` status families.
+- Admin delivery tracking dashboard at `/admin/tracking` with shipment KPIs,
+  searchable/filterable shipment list and direct detail links.
+- Admin shipment detail screen for courier name/code, tracking number, tracking URL,
+  package weight, shipping cost, estimated delivery and manual tracking events.
+- Tracking events can now advance shipment state and keep order lifecycle dates/status
+  synchronized for shipped, out-for-delivery, delivered and returned milestones.
+- Existing admin order detail shipment widget now links to the dedicated tracking
+  screen and can append status-aware tracking events.
+- Public courier webhook endpoint at `/tracking/webhook`, CSRF-excluded, with optional
+  HMAC verification through `tracking_webhook_secret` or `TRACKING_WEBHOOK_SECRET`.
+- Public track-order page now renders richer shipment badges and timestamped delivery
+  events alongside order history.
+- Customer account order detail now uses a unified order/shipment timeline, richer
+  shipment cards and delivered-order return/exchange CTA.
+- Customer returns area at `/account/returns` plus delivered-order return/exchange
+  request form at `/account/returns/request/{order_id}`.
+- Admin return detail/review screen at `/admin/returns/view/{id}` with status updates,
+  rejection notes and optional returned-item restocking.
+- Generic admin resource list now exposes direct tracking/return detail actions and
+  renders shipment/return statuses with the correct badge maps.
+
+### Verification
+
+- Full PHP lint passed for every file under `application/`.
+- Admin tracking dashboard loaded and showed the existing packed shipment.
+- Admin shipment detail loaded, courier assignment saved and tracking number/URL were
+  persisted.
+- Admin tracking event marked the shipment delivered and synchronized the parent order
+  to delivered.
+- Public track-order lookup displayed the delivered tracking event.
+- Tracking webhook accepted a JSON courier update and appended a second delivery
+  event.
+- Customer account order detail showed the unified timeline and return/exchange CTA
+  after delivery.
+- Customer return request form created a return request for a delivered order.
+- Customer returns list displayed the new return request.
+- Admin returns list/detail loaded and the return status advanced to approved.
+- Latest Phase 9 log scan showed no fresh errors.
+- No database schema changes were made in Phase 9.
+
+### Verification data created
+
+- Shipment `SHP-20260802-38FE13` was assigned to `Kupiana Express` with tracking
+  number `KXP-PHASE9-001` and marked delivered for smoke testing.
+- Order `ORD-20260802-F4A564` was moved to delivered by the tracking flow.
+- Return request `RET-20260803-8E47A3` was created and approved for smoke testing.
+
+### Carried forward
+
+- Shipment and return analytics were added to reports in Phase 10.
+- Production courier integrations can replace the local webhook adapter once a real
+  courier provider and secret are configured.
+
+---
+
+## Phase 10 — Reports — DONE
+
+### Delivered
+
+- Dedicated `Report_model` for read-only aggregate reporting across sales, revenue,
+  GST, payments, shipments, returns, customers, inventory, products, suppliers,
+  coupons and estimated profit/loss.
+- Shared report dashboard KPIs for selected date ranges: orders, revenue, delivered
+  shipments and return volume.
+- Date range filters on every report with safe defaults to the latest 30-day window.
+- CSV export route for every report at `/admin/reports/export/{type}`.
+- Expanded reports menu entries for payments, shipments, returns and coupons.
+- Rebuilt report view with report-type tabs, reusable KPI cards, dynamic extra
+  columns and totals.
+- GST report now includes CGST, SGST and IGST split totals.
+- Inventory report now separates available, on-hand and reserved stock.
+- Products report now ranks top products by ordered quantity and sales value.
+- Profit/loss report now estimates gross profit from gross revenue, refunds,
+  product cost and shipment cost.
+- Shipment and return analytics now consume the Phase 9 tracking/return data.
+
+### Verification
+
+- Full PHP lint passed for every file under `application/`.
+- Authenticated admin smoke passed for all report pages:
+  sales, revenue, GST, payments, shipments, returns, customers, inventory,
+  products, suppliers, coupons and profit/loss.
+- Date-range filters were exercised with `2026-08-01` through `2026-08-03`.
+- Sales CSV export returned 200 with `text/csv; charset=utf-8`.
+- Report data range was verified against existing orders, shipments and returns.
+- Latest Phase 10 log scan showed no fresh error-level entries.
+- No database schema changes were made in Phase 10.
+
+### Carried forward
+
+- Repeatable smoke/lint coverage was added in Phase 11.
+- Future production analytics can add chart widgets and scheduled report delivery.
+
+---
+
+## Phase 11 — Testing — DONE
+
+### Delivered
+
+- Project-native test harness under `tests/` that does not require Composer vendor
+  dependencies or PHPUnit.
+- `tests/lint.sh` to lint every PHP file under `application/` and `tests/`.
+- `tests/run.sh` to run lint, start the PHP built-in server with an HMVC-compatible
+  router, execute the smoke suite and stop the server automatically.
+- `tests/support/router.php` mirrors the documented dev-server rewrite behavior.
+- `tests/smoke.php` provides repeatable route, auth, ACL, report export, webhook
+  rejection and read-only database integrity assertions.
+- `tests/README.md` documents how to run the suite locally and against an existing
+  server.
+- Composer shortcuts added: `composer test` and `composer lint`.
+- README updated to reflect the current bcrypt/password_hash authentication and the
+  Phase 11 test workflow.
+
+### Automated coverage
+
+- Public storefront routes: home, shop, search, deals, offers, brands, cart, wishlist,
+  contact, track-order, blog, robots.txt and sitemap.xml.
+- Checkout empty-cart behavior: page renders or safely redirects instead of 500ing.
+- Admin access control: guests redirect to login; customers receive 403.
+- Admin route smoke: dashboard, products, orders, inventory, tracking, returns,
+  payments and all report pages.
+- Report export: sales CSV export returns a CSV response.
+- Webhook rejection paths: invalid Razorpay signature and invalid tracking JSON return
+  400.
+- Customer account routes: dashboard, orders, returns, profile, security and
+  addresses.
+- Read-only database integrity: database connection, expected table count,
+  soft-delete column presence and seeded active users.
+
+### Verification
+
+- `tests/run.sh` passed twice after implementation.
+- Final run: **52 passed, 0 failed**.
+- Full PHP lint passed for every file under `application/` and `tests/`.
+- Latest Phase 11 log scan showed no fresh error-level entries.
+- The test runner stopped its local PHP server automatically; no listener remained on
+  port 8891.
+- No database schema changes were made in Phase 11.
+
+### Carried forward
+
+- Phase 12 used the repeatable test harness as the safety net for optimization work.
+- A future disposable test database can enable mutating end-to-end checkout,
+  fulfilment, payment, tracking and return-flow assertions.
+
+---
+
+## Phase 12 — Optimization — DONE
+
+### Delivered
+
+- Added `App_cache`, a small application cache facade that uses CodeIgniter's file
+  cache when available and falls back to per-request memory when file caching is not
+  writable or supported.
+- Autoloaded the cache facade so controllers/models can share the same lightweight
+  optimization path.
+- Cached frequently reused storefront reference data: featured products, categories,
+  mega menu, brands, testimonials and CMS pages.
+- Rebuilt the storefront mega menu loader to remove the parent/child category N+1
+  query pattern.
+- Replaced cart and wishlist header-count lookups with direct aggregate/count
+  queries instead of loading full product rows.
+- Added cached report aggregation for admin report pages and CSV exports with short
+  TTLs suitable for operational dashboards.
+- Added short-lived admin dashboard KPI and chart caching to reduce repeated
+  aggregate work during normal page refresh/AJAX polling.
+- Added Apache asset cache headers for static files under `public/assets/`.
+
+### Verification
+
+- Full PHP lint passed for every file under `application/` and `tests/`.
+- `tests/run.sh` passed after optimization.
+- Final run: **52 passed, 0 failed**.
+- Latest Phase 12 log scan showed no fresh error-level entries.
+- The test runner stopped its local PHP server automatically; no listener remained on
+  port 8891.
+- No database schema changes were made in Phase 12.
+
+### Carried forward
+
+- Phase 13 can focus on deployment hardening: production environment values, web
+  server rewrite/cache configuration, writable-directory checks, backup/restore
+  routine, scheduler/cron notes and launch verification.
+- Current caches are deliberately short-TTL and self-expiring; explicit cache
+  invalidation hooks can be added later if admin catalog edits need instant
+  storefront freshness.
+
+---
+
+## Phase 13 — Deployment — DONE
+
+### Delivered
+
+- Added a production deployment runbook covering server requirements, release files,
+  environment setup, writable directories, database launch notes, preflight checks,
+  smoke testing, scheduler setup, gateway webhooks and launch checklist.
+- Added `.env.example` with production-ready placeholders for app, database, cookie,
+  session, ZeptoMail, Razorpay and tracking webhook settings.
+- Updated `index.php` so `CI_ENV` can be supplied by the server process or `.env`
+  before CodeIgniter defines the application environment.
+- Made deployment-sensitive config env-driven: `APP_BASE_URL`,
+  `APP_ENCRYPTION_KEY`, `SESSION_SAVE_PATH`, cookie domain/secure/samesite and
+  trusted proxy IPs.
+- Disabled CodeIgniter database query saving in production to reduce memory use and
+  avoid retaining debug query strings.
+- Hardened the root Apache `.htaccess` with directory-index blocking, sensitive-file
+  denial and baseline security headers while preserving CodeIgniter rewrites.
+- Added `scripts/preflight.php` to verify PHP/runtime requirements, protected files,
+  writable paths, database connectivity and production readiness warnings.
+- Added Composer shortcuts for deployment preflight and the production maintenance
+  cron task.
+- Added a CLI-only `Cron` controller and wired the carried-forward
+  `Login_attempt_model::prune()` cleanup into a daily scheduler command.
+- Updated README with the deployment quick path and scheduler note.
+
+### Verification
+
+- Targeted PHP lint passed for the new/changed deployment files.
+- Full `tests/run.sh` passed after deployment hardening.
+- Final run: **52 passed, 0 failed**.
+- Local preflight passed with **0 failures** and expected local-development warnings.
+- Production-mode preflight passed with supplied production environment values:
+  **0 failures, 0 warnings**.
+- CLI maintenance command ran successfully and removed no rows with the conservative
+  verification retention window.
+- Latest Phase 13 log scan showed no fresh error-level entries.
+- The test runner stopped its local PHP server automatically; no listener remained on
+  port 8891.
+- No database schema changes were made in Phase 13.
+
+### Carried forward
+
+- A real production launch still requires host-specific values: final domain, TLS,
+  production database credentials, mail/gateway secrets, webhook dashboard setup and
+  a verified backup/restore process.
+- If the deployment target is offline or CDN-restricted, vendor Bootstrap 5 and Font
+  Awesome into `public/assets/vendor/` before launch.
 
 ---
 
@@ -233,8 +717,8 @@ persistence, off-canvas sidebar below 992px, toast rendering.
 - `application/modules/user/views/dashboard.php` and the catalog `category.php` /
   `product_detail.php` views still use the removed scaffold CSS classes. They render
   but look plain. Phase 5 rebuilds them.
-- Bootstrap/Font Awesome/Chart.js load from CDN. Vendor them for offline deployment
-  (Phase 13).
+- Bootstrap/Font Awesome/Chart.js load from CDN. Phase 13 documents vendoring them
+  for offline or CDN-restricted deployments.
 - No `Upload`, `Mailer`, `Sms`, `Pdf` or `Excel` library yet — added in the phases
   that first need them (4, 8, 10).
 
@@ -497,21 +981,250 @@ Turn the first on to force verification before sign-in.
 - **SMS is not wired.** `sms_templates` is seeded and `Otp_model` accepts
   `channel = 'sms'`, but there is no SMS gateway — OTP is email-only. Phase 8/9 should
   add an `Sms` library alongside `Mailer`.
-- Account-security screens (change password, active devices) are **service-ready but
-  have no UI**: `Auth_service::change_password()` and
-  `User_session_model::active_for_user()` exist, unused until Phase 5 builds the
-  customer dashboard.
-- `login_attempts` grows unbounded; `Login_attempt_model::prune()` exists but nothing
-  calls it. Wire it to a scheduled task in Phase 13.
+- `login_attempts` pruning is now available through the Phase 13 CLI scheduler
+  command documented in `DEPLOYMENT.md`.
 - Registration does not yet verify the phone number.
 
 ---
 
-## Phase 4 — Admin Panel — TODO (next)
+## Current resume point — COMPLETE
 
-Build the 50 back-office modules on `Admin_Controller` + `MY_Model`. Start with the
-generic CRUD scaffold (list + filters + bulk actions + form + validation), then apply
-it per module. Remember: `Payment_model` must set `$status_column = 'status_flag'`.
+Phase 13 is complete. All listed build phases are marked **DONE**. Future work should
+be treated as launch customization, production credential setup or post-launch
+enhancement rather than a remaining numbered phase.
+
+### Post-phase SEO hardening — DONE
+
+- Storefront layout now renders normalized title, description, keywords when
+  present, canonical, prev/next pagination links, hreflang, Open Graph and Twitter
+  card metadata.
+- Site-wide Organization and WebSite JSON-LD is emitted automatically.
+- Product pages now render richer Product/Offer/AggregateRating/BreadcrumbList
+  schema, canonical URLs, product Open Graph images and admin-managed `seo_meta`
+  overrides.
+- Shop, category, brand and deals pages now render clean canonicals, ItemList schema
+  and breadcrumb schema; filtered/search variants are kept `noindex,follow`.
+- CMS pages, contact and blog posts now render page/contact/article schema, with a
+  new SEO-friendly blog detail route.
+- `robots.txt` now keeps admin, account, cart, checkout, payment, API and filtered
+  search URLs out of crawl focus while advertising the sitemap.
+- `sitemap.xml` now includes storefront discovery URLs, categories, brands,
+  products with image metadata, CMS pages and blog posts.
+- Admin/API responses emit `X-Robots-Tag` noindex headers where appropriate.
+- `SEO.md` documents the launch SEO checklist for domain, content, assets,
+  Search Console, analytics and sitemap submission.
+- The smoke harness now verifies key SEO behavior; latest run passed **60 passed,
+  0 failed**.
+- No database schema changes were made.
+
+### Organic spices & oils storefront conversion — DONE
+
+- Homepage hero, section labels, trust strip and route metadata now position
+  Kupiana as an organic spices, whole masalas and cold-pressed oils store.
+- Live catalog content now uses pantry-specific categories, brands, products,
+  product images, banners, CMS pages, testimonials, blog categories, attributes,
+  tags, HSN descriptions and SEO settings.
+- Seed data now mirrors the organic spices/oils catalog so future resets do not
+  restore the previous general-commerce product mix.
+- Added SVG product, category, brand and hero/banner assets for the organic pantry
+  catalog.
+- Smoke harness now searches for turmeric instead of the previous sample product.
+- Latest verification passed **60 passed, 0 failed**.
+- No database schema changes were made.
+
+Remember: `payments.status` is the gateway state, while `payments.status_flag` is the
+MY_Model lifecycle column. Any dedicated `Payment_model` must set
+`$status_column = 'status_flag'`.
+
+---
+
+## Storefront imagery — DONE (2026-08-03)
+
+All flat SVG artwork was replaced with real photography, watermarked with the
+Kupiana logo. 25 images: 10 products, 10 categories, 3 banners, hero, og:image.
+
+### The pipeline (this is the deliverable, not the images)
+
+| File | Purpose |
+|---|---|
+| `tools/fetch_sources.php` | Re-downloads the source photographs (~20 MB, not in git) |
+| `tools/image_lib.php` | GD routines: crop, cover-fit, white-key, watermark, save |
+| `tools/build_images.php` | Crop map + build. `--sheet` writes a QA contact sheet |
+| `tools/source/CREDITS.md` | Origin and licence of every source frame |
+
+```bash
+/Applications/XAMPP/bin/php tools/fetch_sources.php
+/Applications/XAMPP/bin/php tools/build_images.php --sheet   # -> /tmp/kupiana_images.jpg
+```
+
+Output overwrites the exact filenames the database already references, so
+swapping in real product photography needs **no SQL** — point a recipe's `src`
+at a new file and re-run. Verified by deleting `tools/source/` entirely and
+rebuilding all 25 images from scratch.
+
+### Key decision: one flatlay, many products
+
+Eight of ten product images are cropped from a **single 6000×4000 flatlay**.
+Sourcing ten separate stock photos was tried first and produced exactly the
+"odd" look being complained about — mismatched white balance, backgrounds and
+lighting across the grid. One frame means one lighting setup, so the catalogue
+reads as art-directed rather than assembled. `tools/build_images.php` holds the
+crop map in *source* pixel coordinates.
+
+### Watermark
+
+The supplied logo is an opaque PNG on white, so it cannot be composited
+directly. `img_key_white()` keys the background to transparency with a feathered
+edge, and the mark sits on a soft translucent plate — without it the dark-brown
+logo vanishes on dark photography and the green leaves disappear against herbs.
+
+### Sourcing: what was actually tried
+
+Four sources were tested before settling. Recorded so nobody repeats it:
+
+| Source | Result |
+|---|---|
+| Unsplash direct ids | Best quality and licence, but **no keyless search** — ids must be recalled and verified by eye. ~85% resolve, ~20% on-subject. |
+| Unsplash / loremflickr search endpoints | Dead (503/500). |
+| Openverse API | Real topical search, but CC0/PD coverage is thin and often off-subject. Yielded one usable frame. |
+| Wikimedia Commons categories | Densely populated but **documentary**: cumin *fields*, oil boiling in pots, a competitor's branded jar. Unusable for retail. |
+
+### Known gaps
+
+- **Groundnut oil and sesame oil share one bottle photograph** (wide vs. tight
+  crop). Both are clear golden pressed oils so it reads acceptably, but it is
+  the same bottle. These two are the first to replace with a real shoot.
+- These are stock photos of the correct *ingredients*, not of Kupiana's actual
+  products. Fine for launch; replace before print or paid ads.
+- Brand logos stay as SVG (`public/uploads/brands/*.svg`) — they are marks, not
+  photographs, and vector is correct for them.
+- `pantry-staples` category has an image but no products mapped to it.
+- Related products render 0 on product pages: `related` matches the product's
+  primary category, which for this catalogue is a leaf holding one product.
+  Not a regression — worth revisiting when the catalogue grows.
+
+### `.gitignore`
+
+`public/uploads/**` is ignored as runtime upload space, but the seeded
+catalogue imagery is now **un-ignored** — `database/seed.sql` references those
+exact filenames, so a fresh clone without them 404s every product tile.
+`tools/source/*.jpg` stays ignored and is re-fetchable.
+
+### Two pre-existing bugs found and fixed
+
+Both were hiding the new imagery, so they were fixed rather than just reported.
+
+1. **`Store_model::products()` paginated at one product per page.** Callers
+   build `$params` straight from the query string, so `per_page` is *present
+   but NULL* when the visitor supplies nothing. `array_get()` only falls back on
+   a **missing** key, not a null value, so the default of 12 never applied:
+   `(int) NULL` → `0` → `max(1, 0)` → **1**. `/shop` showed "Showing 1–1 of 10"
+   across 10 pages. Now coalesces on emptiness rather than absence.
+2. **Category pages listed no products at all.** `product_query()` filtered on
+   `products.category_id`, the single *primary* category. Every product's
+   primary category here is a leaf ("Turmeric & Ginger"), so browsing a parent
+   ("Organic Spices") matched nothing even though `product_categories` mapped
+   it correctly. Now matches through the pivot via a subquery, which avoids the
+   row duplication a JOIN would introduce.
+
+Also fixed: `seo_helper` advertised the grey `placeholder.svg` as the default
+`og:image` — social shares showed a placeholder. Now `og-default.jpg`.
+`catalog/views/home.php` hard-coded a deleted SVG hero.
+
+### Verification — PASSED
+
+Lint clean across `application/` and `tools/`; no ERROR log entries.
+
+| Check | Result |
+|---|---|
+| Images built | 25 (6.0 MB total) |
+| Rebuild from empty `tools/source/` | All 8 sources fetched, all 25 rebuilt |
+| DB paths resolving to a file on disk | 23/23 (10 products, 10 categories, 3 banners) |
+| Fresh `schema.sql` + `seed.sql` load | Clean; 10/10/3 distinct images |
+| Every image URL on `/`, `/shop`, `/category/*`, product page | all HTTP 200 |
+| `/shop` product cards | 1 → **10** after pagination fix |
+| Category cards vs. pivot counts | 4/3/3/3/1/2/1/0 — exact match |
+| `?per_page=4` override | still honoured ("Showing 1–4 of 10") |
+| Served content types / dimensions | `image/jpeg`, 1000×1000 / 800×600 / 2000×760 |
+| SVGs still served from uploads | none |
+
+---
+
+## Theme — terracotta (2026-08-03)
+
+Primary is **`#cc4e3a`**, the chilli red from the logo. The rest of the palette
+was retuned around it rather than left on the stock Bootstrap blue-grey scale.
+
+### Palette
+
+| Token | Value | Notes |
+|---|---|---|
+| `--k-primary` | `#cc4e3a` | Brand. Washes, borders, gradients, focus rings |
+| `--k-primary-ink` | `#c24733` | Anything with text on it — see accessibility below |
+| `--k-primary-hover` / `-dark` | `#ae3f2d` / `#933425` | Hover / active |
+| `--k-success` | `#4b8b3b` | Leaf green from the logo sprig, not emerald |
+| `--k-info` | `#0f7d8c` | Teal — complement of a warm red |
+| `--k-warning` | `#d59120` | Turmeric amber |
+| `--k-danger` | `#a4133c` | Cool crimson — **deliberately not a deeper red** |
+| `--k-dark` / sidebar | `#2a1a12` | Warm near-black from the logo brown |
+| neutrals | `#faf6f2` `#f6efe8` `#e9dfd6` `#2c1e16` `#7b6a5f` | Warm greys |
+
+Two decisions worth not undoing:
+
+- **Danger is crimson, not a deeper red.** A darker red sits at the same hue as
+  primary (8°) and becomes indistinguishable inside a 12%-tint badge — exactly
+  where a destructive action must never be ambiguous. Crimson (343°) reads
+  clearly apart.
+- **Neutrals are warm.** Cool slate next to terracotta reads dirty; these greys
+  carry a little red so surfaces sit under the brand colour.
+
+Dark theme lifts primary to `#e4674f` and uses warm near-blacks — the
+light-mode tones go muddy on a dark backdrop, and cold slate makes the
+terracotta look orange.
+
+### Accessibility
+
+White text on `#cc4e3a` measures **4.45:1** — just under the WCAG AA threshold
+of 4.5 for normal text, which button labels and links are. `--k-primary-ink`
+(`#c24733`, 4.95:1) is 2% darker, visually indistinguishable, and carries every
+text-bearing surface: buttons, links, active pagination, avatars, the newsletter
+band. `#cc4e3a` itself remains the brand colour everywhere text is not involved.
+
+To use the exact brand hex everywhere instead, set `--k-primary-ink: #cc4e3a`
+and accept 4.45 — one line.
+
+**All 27 foreground/background pairs pass AA in both themes**, verified by
+computing relative luminance (including flattening the `rgba()` badge tints over
+their surface, since a tint is not a solid colour). `btn-success` also had to
+drop to `#437d35`; `badge-soft-warning` and `-secondary` inks were nudged from
+AA-large to full AA.
+
+### Files touched
+
+- `public/assets/css/app.css` — tokens, dark theme, soft badges, sidebar,
+  overlays, dashboard gradient.
+- **Bootstrap override block** (new). Bootstrap 5.3 compiles `.btn-*` and
+  `.btn-outline-*` to literal hex through Sass, so setting `--bs-primary` alone
+  leaves ~100 buttons blue. Each variant is re-declared via its own
+  `--bs-btn-*` API so hover/active/focus/disabled all follow. Same for alerts,
+  `.form-check-input:checked`, `.progress`, `.dropdown-item.active`,
+  `.nav-pills`, `.list-group`, `.accordion`.
+- `application/modules/admin/views/dashboard.php` — Chart.js fallbacks, revenue
+  gradient, and the order-status doughnut (`pending / processing / shipped /
+  delivered / cancelled` now map to the new semantic colours).
+- `application/views/email/layout.php` — header, links **and neutrals**. Email
+  clients cannot read CSS custom properties, so these are literal hex and would
+  otherwise have stayed cold grey against a terracotta header.
+
+Not touched: `application/views/errors/html/*` are CodeIgniter's stock error
+pages, still on framework defaults. Low traffic, but restyle them if a visitor
+could ever see one.
+
+### Verification
+
+CSS braces balanced, zero old-palette hex remaining anywhere in `application/`
+or `public/assets/`, PHP lint clean, `/`, `/shop`, `/category/*`, product,
+`/login`, `/register` all HTTP 200, no ERROR log entries.
 
 ---
 

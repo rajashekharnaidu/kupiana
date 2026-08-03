@@ -44,8 +44,13 @@ class MY_Controller extends CI_Controller
 		$this->data['current_user'] = $this->auth->check() ? $this->auth->user() : NULL;
 		$this->data['flash']        = $this->collect_flash();
 		$this->data['meta']         = seo_meta(array(
-			'title'     => $this->data['site_name'],
-			'canonical' => current_url(),
+			'title'       => $this->setting('meta_title', $this->data['site_name']),
+			'description' => $this->setting('meta_description', 'Shop curated ecommerce products from '.$this->data['site_name'].'.'),
+			'canonical'   => current_url(),
+		));
+		$this->data['json_ld']      = seo_json_ld_graph(array(
+			seo_organization_schema(),
+			seo_website_schema(),
 		));
 	}
 
@@ -328,6 +333,7 @@ class Admin_Controller extends MY_Controller
 		$this->data['is_admin']    = TRUE;
 
 		$this->meta(array('robots' => 'noindex,nofollow'));
+		$this->output->set_header('X-Robots-Tag: noindex, nofollow');
 	}
 
 	/**
@@ -376,9 +382,11 @@ class Store_Controller extends MY_Controller
 	{
 		parent::__construct();
 
+		$this->load->model('Store_model', 'store');
 		$this->data['is_admin']       = FALSE;
 		$this->data['cart_count']     = $this->cart_count();
 		$this->data['wishlist_count'] = $this->wishlist_count();
+		$this->data['mega_menu']      = $this->store->mega_menu();
 	}
 
 	/**
@@ -389,9 +397,7 @@ class Store_Controller extends MY_Controller
 	 */
 	protected function cart_count()
 	{
-		$cart = $this->session->userdata('cart');
-
-		return is_array($cart) ? count($cart) : 0;
+		return $this->store->cart_count($this->cart_identity());
 	}
 
 	/**
@@ -402,9 +408,22 @@ class Store_Controller extends MY_Controller
 	 */
 	protected function wishlist_count()
 	{
-		$wishlist = $this->session->userdata('wishlist');
+		if ( ! $this->auth->check())
+		{
+			$wishlist = $this->session->userdata('wishlist');
+			return is_array($wishlist) ? count($wishlist) : 0;
+		}
 
-		return is_array($wishlist) ? count($wishlist) : 0;
+		return $this->store->wishlist_count((int) $this->session->userdata('user_id'));
+	}
+
+	/** @return array */
+	protected function cart_identity()
+	{
+		return array(
+			'user_id' => $this->auth->check() ? (int) $this->session->userdata('user_id') : NULL,
+			'session_id' => session_id(),
+		);
 	}
 }
 
@@ -425,6 +444,7 @@ class Api_Controller extends MY_Controller
 		parent::__construct();
 
 		$this->output->set_content_type('application/json', 'utf-8');
+		$this->output->set_header('X-Robots-Tag: noindex, nofollow');
 
 		$method = strtoupper($this->input->method());
 

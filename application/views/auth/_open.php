@@ -26,9 +26,7 @@ $auth_width = isset($auth_width) ? $auth_width : 'col-lg-5';
 					<div class="card-body p-4 p-md-5">
 
 						<div class="text-center mb-4">
-							<span class="brand-mark d-inline-flex mb-3" style="width:48px;height:48px;font-size:1.25rem;">
-								<i class="fa-solid fa-bag-shopping"></i>
-							</span>
+							<img class="brand-logo brand-logo-auth mb-3" src="<?php echo base_url(array_get($app, 'logo', 'public/assets/images/kupiana-logo-512.png')); ?>" alt="<?php echo html_escape($site_name); ?> logo">
 							<h1 class="h4 mb-1"><?php echo html_escape($auth_title); ?></h1>
 							<?php if ( ! empty($auth_subtitle)): ?>
 								<p class="text-muted mb-0"><?php echo $auth_subtitle; ?></p>

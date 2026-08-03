@@ -7,10 +7,27 @@ application/cache/*
 application/logs/*
 !application/logs/index.html
 
-# Keep the upload directory structure, ignore uploaded content.
+# Keep the upload directory structure, ignore runtime-uploaded content.
 public/uploads/**/*
 !public/uploads/**/index.html
 !public/uploads/.htaccess
+
+# ...but the seeded catalogue imagery is part of the application, not user
+# content: database/seed.sql references these exact filenames, so a fresh
+# clone must have them or every product tile 404s.
+!public/uploads/products/
+!public/uploads/products/*.jpg
+!public/uploads/categories/
+!public/uploads/categories/*.jpg
+!public/uploads/banners/
+!public/uploads/banners/*.jpg
+!public/uploads/brands/
+!public/uploads/brands/*.svg
+
+# Source photography is large (~20 MB) and re-fetchable via
+# tools/fetch_sources.php, so it stays out of the repository.
+tools/source/*.jpg
+tools/source/*.png
 
 !application/*/.htaccess
 

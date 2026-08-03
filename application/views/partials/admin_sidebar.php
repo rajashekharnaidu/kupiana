@@ -19,8 +19,7 @@ $active = isset($active_menu) ? $active_menu : '';
 
 	<div class="sidebar-brand">
 		<a href="<?php echo site_url('admin'); ?>" class="d-flex align-items-center gap-2">
-			<span class="brand-mark"><i class="fa-solid fa-bag-shopping"></i></span>
-			<span class="brand-text"><?php echo html_escape($site_name); ?></span>
+			<img class="brand-logo brand-logo-admin" src="<?php echo base_url(array_get($app, 'logo', 'public/assets/images/kupiana-logo-512.png')); ?>" alt="<?php echo html_escape($site_name); ?> logo">
 		</a>
 		<button type="button" class="btn btn-sm btn-icon sidebar-close d-lg-none" data-sidebar-toggle>
 			<i class="fa-solid fa-xmark"></i>

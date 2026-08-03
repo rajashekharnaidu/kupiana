@@ -66,7 +66,8 @@ $autoload['libraries'] = array(
 	'acl',
 	'settings',
 	'audit',
-	'api_response',
+	'app_cache',
+	'api_response', 'export',
 	'mailer',
 );
 

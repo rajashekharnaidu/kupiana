@@ -1,0 +1,3 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<section class="py-5 bg-light border-bottom"><div class="container text-center"><div class="display-6 text-danger mb-3"><i class="fa-solid fa-circle-xmark"></i></div><h1 class="h3">Payment failed</h1><p class="text-muted mb-0">Order <?php echo html_escape($order->order_number); ?> is still pending payment.</p></div></section>
+<section class="py-5"><div class="container text-center"><a class="btn btn-primary" href="<?php echo site_url('payments/razorpay/pay/'.$order->id); ?>">Try Again</a> <a class="btn btn-outline-secondary" href="<?php echo site_url('account/orders/'.$order->id); ?>">View Order</a></div></section>

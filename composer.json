@@ -17,6 +17,18 @@
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"
 	},
 	"scripts": {
+		"test": [
+			"tests/run.sh"
+		],
+		"lint": [
+			"tests/lint.sh"
+		],
+		"preflight": [
+			"php scripts/preflight.php"
+		],
+		"cron:prune-login-attempts": [
+			"php index.php cron prune_login_attempts 90"
+		],
 		"test:coverage": [
 			"@putenv XDEBUG_MODE=coverage",
 			"phpunit --color=always --coverage-text --configuration tests/travis/sqlite.phpunit.xml"
