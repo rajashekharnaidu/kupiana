@@ -19,6 +19,7 @@ class Checkout extends Store_Controller
 	{
 		$this->load->model('Order_model', 'orders');
 		$this->load->model('Store_model', 'store');
+		$this->load->library('cashfree_gateway');
 		$identity = $this->cart_identity();
 		$items = $this->store->cart_items($identity);
 		if (empty($items))
@@ -60,7 +61,7 @@ class Checkout extends Store_Controller
 			'items' => $items,
 			'totals' => $this->totals($items),
 			'default_address' => $this->default_address(),
-			'cashfree_available' => (bool) getenv('CASHFREE_APP_ID'),
+			'cashfree_available' => $this->cashfree_gateway->enabled(),
 			'meta' => seo_meta(array('title' => seo_title('Checkout'), 'canonical' => site_url('checkout'), 'robots' => 'noindex,follow')),
 		));
 	}

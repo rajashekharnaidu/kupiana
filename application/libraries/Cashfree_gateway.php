@@ -17,8 +17,8 @@ class Cashfree_gateway
 	public function __construct()
 	{
 		$this->ci = &get_instance();
-		$this->app_id = getenv('CASHFREE_APP_ID');
-		$this->secret_key = getenv('CASHFREE_SECRET_KEY');
+		$this->app_id = kupiana_env('CASHFREE_APP_ID');
+		$this->secret_key = kupiana_env('CASHFREE_SECRET_KEY');
 	}
 
 	/**
