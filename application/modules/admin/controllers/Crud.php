@@ -12,6 +12,8 @@ class Crud extends Admin_Controller
 	protected $model;
 	/** @var string */
 	protected $resource_key = '';
+	/** @var int|null Current record ID being edited (for validation callbacks). */
+	protected $current_record_id = NULL;
 
 	public function __construct()
 	{
@@ -135,6 +137,7 @@ class Crud extends Admin_Controller
 			$this->require_manage();
 		}
 		$is_update = $id !== NULL;
+		$this->current_record_id = $id;
 		if ($this->input->method(TRUE) === 'POST')
 		{
 			$input = (array) $this->input->post(NULL, TRUE);
@@ -275,10 +278,9 @@ class Crud extends Admin_Controller
 	/** Validate slug is unique, excluding current record on update. */
 	public function validate_unique_slug($slug)
 	{
-		$id = $this->input->post('id', TRUE);
 		$table = $this->resource['table'];
 		$this->db->select('id')->from($table)->where('slug', $slug);
-		if ($id) { $this->db->where('id !=', (int)$id); }
+		if ($this->current_record_id) { $this->db->where('id !=', (int)$this->current_record_id); }
 		$existing = $this->db->limit(1)->get()->row();
 		if ($existing)
 		{
