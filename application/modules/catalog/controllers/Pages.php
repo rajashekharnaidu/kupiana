@@ -8,27 +8,41 @@ class Pages extends Store_Controller
 		$this->load->model('Store_model', 'store');
 		$page = $this->store->page($slug);
 		if ( ! $page) { show_404(); }
-		$this->render('page', array(
+
+		$direct_page_slugs = array('about', 'privacy-policy', 'terms', 'return-policy', 'shipping-policy');
+		$canonical = in_array($page->slug, $direct_page_slugs, TRUE)
+			? site_url($page->slug)
+			: site_url('page/'.$page->slug);
+		$description = $page->meta_description ?: strip_tags(mb_strimwidth((string) $page->content, 0, 160));
+		$payload = array(
 			'page' => $page,
 			'meta' => seo_entity_meta('page', $page->id, array(
 				'title' => seo_title($page->meta_title ?: $page->title),
-				'description' => $page->meta_description ?: strip_tags(mb_strimwidth((string) $page->content, 0, 160)),
-				'canonical' => site_url('page/'.$page->slug),
+				'description' => $description,
+				'canonical' => $canonical,
 			)),
 			'json_ld' => seo_json_ld_graph(array(
 				seo_organization_schema(),
 				seo_website_schema(),
-				seo_breadcrumb_schema(array('Home' => site_url(), $page->title => site_url('page/'.$page->slug))),
+				seo_breadcrumb_schema(array('Home' => site_url(), $page->title => $canonical)),
 				array(
 					'@type' => 'WebPage',
-					'@id' => site_url('page/'.$page->slug).'#webpage',
+					'@id' => $canonical.'#webpage',
 					'name' => $page->title,
 					'description' => seo_clean_text($page->meta_description ?: $page->content, 200),
-					'url' => site_url('page/'.$page->slug),
+					'url' => $canonical,
 				),
 				seo_entity_schema('page', $page->id),
 			)),
-		));
+		);
+
+		if ($page->slug === 'about')
+		{
+			$this->render('about', $payload);
+			return;
+		}
+
+		$this->render('page', $payload);
 	}
 
 	public function contact()

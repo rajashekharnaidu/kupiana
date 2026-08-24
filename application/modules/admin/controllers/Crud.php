@@ -83,6 +83,7 @@ class Crud extends Admin_Controller
 		if ($row && $this->model->delete($id))
 		{
 			$this->audit->deleted($this->resource['table'], $id, (array) $row);
+			$this->invalidate_resource_cache($row);
 			$this->session->set_flashdata('success', $this->resource['label'].' record deleted.');
 		}
 		redirect('admin/'.$this->resource_key);
@@ -124,7 +125,15 @@ class Crud extends Admin_Controller
 	/** @return void */
 	protected function save($existing = NULL, $id = NULL)
 	{
-		$this->require_manage();
+		$save_permission = isset($this->resource['save_permission']) ? $this->resource['save_permission'] : NULL;
+		if ($save_permission !== NULL)
+		{
+			$this->require_permission($save_permission);
+		}
+		else
+		{
+			$this->require_manage();
+		}
 		$is_update = $id !== NULL;
 		if ($this->input->method(TRUE) === 'POST')
 		{
@@ -134,6 +143,14 @@ class Crud extends Admin_Controller
 			{
 				if (array_key_exists($field, $input)) { $data[$field] = is_array($input[$field]) ? json_encode($input[$field]) : $input[$field]; }
 			}
+
+			log_message('info', sprintf(
+				'Admin CRUD %s %s request for %s.',
+				$is_update ? 'update' : 'create',
+				$this->resource_key,
+				current_url()
+			));
+
 			$this->merge_uploads($data);
 			$this->normalise_data($data);
 			$this->generated_defaults($data);
@@ -141,16 +158,51 @@ class Crud extends Admin_Controller
 			$this->form_validation->set_rules($rules);
 			if ($this->form_validation->run() === TRUE)
 			{
+				log_message('info', sprintf(
+					'Admin CRUD %s %s validated fields: %s',
+					$is_update ? 'update' : 'create',
+					$this->resource_key,
+					implode(', ', array_keys($data))
+				));
+
 				$written = $is_update ? $this->model->update($id, $data) : $this->model->insert($data);
 				if ($written !== FALSE)
 				{
 					$record_id = $is_update ? $id : $written;
 					if ($is_update) { $this->audit->updated($this->resource['table'], $record_id, (array) $existing, $data); }
 					else { $this->audit->created($this->resource['table'], $record_id, $data); }
+					$this->invalidate_resource_cache($existing, $data);
+					log_message('info', sprintf(
+						'Admin CRUD %s %s succeeded for record %d.',
+						$is_update ? 'update' : 'create',
+						$this->resource_key,
+						(int) $record_id
+					));
 					$this->session->set_flashdata('success', $this->resource['label'].' saved successfully.');
 					redirect('admin/'.$this->resource_key);
 				}
-				$this->session->set_flashdata('error', 'The record could not be saved. Check related IDs and required fields.');
+
+				$db_error = $this->db->error();
+				log_message('error', sprintf(
+					'Admin CRUD %s %s failed for record %s. DB error %d: %s',
+					$is_update ? 'update' : 'create',
+					$this->resource_key,
+					$id !== NULL ? (string) $id : 'new',
+					(int) array_get($db_error, 'code', 0),
+					array_get($db_error, 'message', 'Unknown database error')
+				));
+
+				$this->session->set_flashdata('error', 'The record could not be saved. See application logs for the database error.');
+			}
+			else
+			{
+				log_message('error', sprintf(
+					'Admin CRUD %s %s validation failed for record %s: %s',
+					$is_update ? 'update' : 'create',
+					$this->resource_key,
+					$id !== NULL ? (string) $id : 'new',
+					strip_tags(validation_errors(' | '))
+				));
 			}
 		}
 		$this->breadcrumb($this->resource['label'], 'admin/'.$this->resource_key);
@@ -203,12 +255,24 @@ class Crud extends Admin_Controller
 	protected function validation_rules(array $data, $existing = NULL)
 	{
 		$rules = array();
+		$is_update = $existing !== NULL;
 		foreach ($this->form_columns() as $column)
 		{
 			if ($this->is_upload_field($column->name) && (isset($data[$column->name]) || ($existing && ! empty($existing->{$column->name})))) { continue; }
 			if ( ! empty($column->name) && $column->name !== 'status' && $column->null === 'NO' && $column->default === NULL && ! in_array($column->name, array('description', 'content', 'body', 'notes', 'message'), TRUE))
 			{
 				$rules[] = array('field' => $column->name, 'label' => $this->column_label($column), 'rules' => 'required');
+			}
+
+			// Add unique constraint validation for fields with UNIQUE keys
+			if ($column->name === 'slug' && isset($data['slug']) && $data['slug'] !== '')
+			{
+				$unique_rule = 'is_unique['.$this->resource['table'].'.slug';
+				if ($is_update && $existing) {
+					$unique_rule .= '.id.'.(int)$existing->id;
+				}
+				$unique_rule .= ']';
+				$rules[] = array('field' => 'slug', 'label' => $this->column_label($column), 'rules' => $unique_rule);
 			}
 		}
 		return $rules;
@@ -360,6 +424,32 @@ class Crud extends Admin_Controller
 		foreach ($this->model->columns() as $column)
 		{
 			if ($column->name === 'uuid' && empty($data['uuid'])) { $data['uuid'] = $this->uuid(); }
+		}
+	}
+
+	/** @return void */
+	protected function invalidate_resource_cache($existing = NULL, array $data = array())
+	{
+		if ($this->resource_key !== 'pages' || ! isset($this->app_cache))
+		{
+			return;
+		}
+
+		$slugs = array();
+
+		if (is_object($existing) && ! empty($existing->slug))
+		{
+			$slugs[] = (string) $existing->slug;
+		}
+
+		if (isset($data['slug']) && $data['slug'] !== '')
+		{
+			$slugs[] = (string) $data['slug'];
+		}
+
+		foreach (array_unique($slugs) as $slug)
+		{
+			$this->app_cache->delete('store_page_'.$slug);
 		}
 	}
 

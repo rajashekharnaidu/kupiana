@@ -33,7 +33,7 @@ $config['admin_resources'] = array(
 	'users' => array('table' => 'users', 'label' => 'Staff Users', 'permission' => 'users.view', 'upload_dir' => 'users', 'fixed_filters' => array('user_type !=' => 'customer')),
 	'roles' => array('table' => 'roles', 'label' => 'Roles', 'permission' => 'roles.view'),
 	'permissions' => array('table' => 'permissions', 'label' => 'Permissions', 'permission' => 'permissions.view'),
-	'pages' => array('table' => 'pages', 'label' => 'Pages', 'permission' => 'cms.view'),
+	'pages' => array('table' => 'pages', 'label' => 'Pages', 'permission' => 'cms.view', 'save_permission' => 'cms.view'),
 	'banners' => array('table' => 'banners', 'label' => 'Banners', 'permission' => 'banners.view', 'upload_dir' => 'banners'),
 	'blog' => array('table' => 'blog_posts', 'label' => 'Blog Posts', 'permission' => 'blog.view', 'upload_dir' => 'blog', 'relations' => array('blog_category_id' => array('table' => 'blog_categories', 'label' => 'name'), 'author_id' => array('table' => 'users', 'label' => 'email'))),
 	'testimonials' => array('table' => 'testimonials', 'label' => 'Testimonials', 'permission' => 'testimonials.view', 'upload_dir' => 'testimonials'),
