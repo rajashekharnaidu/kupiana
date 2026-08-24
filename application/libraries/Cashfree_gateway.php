@@ -92,31 +92,10 @@ class Cashfree_gateway
 
 			if ($response && isset($response['message']) && strpos($response['message'], 'authentication') !== FALSE)
 			{
-				log_message('error', 'Cashfree authentication failed - check credentials. Using mock response for development.');
-				if (ENVIRONMENT === 'development')
-				{
-					$mock_response = array(
-						'order_id' => $order_id,
-						'order_amount' => (float) $order->total_amount,
-						'order_currency' => 'INR',
-						'order_status' => 'PENDING',
-						'payments_links' => array(
-							array('url' => 'https://checkout.cashfree.com/pay/TEST' . uniqid(), 'type' => 'cfl_link')
-						),
-						'mock' => TRUE,
-					);
-					log_message('info', 'Using mock Cashfree response for development');
-					return array(
-						'success' => TRUE,
-						'order' => $mock_response,
-						'request' => $request_body,
-						'response' => $mock_response,
-						'mock' => TRUE,
-					);
-				}
+				log_message('error', 'Cashfree authentication failed - Invalid or expired credentials.');
 				return array(
 					'success' => FALSE,
-					'message' => 'Payment gateway authentication failed. Please try again later.',
+					'message' => 'Payment gateway credentials are invalid. Please check your Cashfree configuration.',
 					'request' => $request_body,
 					'response' => $response,
 				);
