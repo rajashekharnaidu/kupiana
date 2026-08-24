@@ -12,15 +12,26 @@ class Cashfree_gateway
 	protected $app_id;
 	protected $secret_key;
 	protected $base_url = 'https://api.cashfree.com/pg';
-	protected $test_base_url = 'https://sandbox.cashfree.com/pg';
+	protected $sandbox_url = 'https://sandbox.cashfree.com/pg';
+	protected $is_sandbox = FALSE;
 
 	public function __construct()
 	{
 		$this->ci = &get_instance();
 		$this->app_id = kupiana_env('CASHFREE_APP_ID');
 		$this->secret_key = kupiana_env('CASHFREE_SECRET_KEY');
+
+		$this->is_sandbox = kupiana_env('CASHFREE_SANDBOX', FALSE);
+		if (ENVIRONMENT !== 'production')
+		{
+			$this->is_sandbox = TRUE;
+		}
+
 		log_message('info', '========== CASHFREE PAYMENT GATEWAY INITIALIZED ==========');
 		log_message('info', 'Environment: '.ENVIRONMENT);
+		log_message('info', 'Cashfree Mode: '.($this->is_sandbox ? 'SANDBOX' : 'PRODUCTION'));
+		log_message('info', 'API URL: '.($this->is_sandbox ? $this->sandbox_url : $this->base_url));
+
 		if ($this->app_id && $this->secret_key)
 		{
 			log_message('info', '[✓] Cashfree credentials loaded (APP_ID: '.substr($this->app_id, 0, 10).'..., SECRET_KEY: '.substr($this->secret_key, 0, 10).'...)');
@@ -256,7 +267,9 @@ class Cashfree_gateway
 
 		log_message('info', '[✓] cURL is available');
 
-		$url = $this->base_url.$endpoint;
+		$base_url = $this->is_sandbox ? $this->sandbox_url : $this->base_url;
+		$url = $base_url.$endpoint;
+		log_message('info', 'Using URL: '.($this->is_sandbox ? 'SANDBOX' : 'PRODUCTION'));
 		log_message('info', 'Full URL: '.$url);
 
 		$headers = array(
