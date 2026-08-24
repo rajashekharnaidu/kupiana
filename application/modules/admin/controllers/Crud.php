@@ -428,8 +428,13 @@ class Crud extends Admin_Controller
 	{
 		foreach ($this->model->columns() as $column)
 		{
-			if ( ! array_key_exists($column->name, $data) || $data[$column->name] !== '') { continue; }
-			if ($column->null === 'YES') { $data[$column->name] = NULL; }
+			if ( ! array_key_exists($column->name, $data)) { continue; }
+			if ($data[$column->name] !== '') { continue; }
+			if ($column->null === 'YES')
+			{
+				$data[$column->name] = NULL;
+				log_message('debug', "Converted {$column->name} from empty string to NULL");
+			}
 		}
 	}
 
