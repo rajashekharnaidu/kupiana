@@ -33,16 +33,20 @@ class Payments extends Store_Controller
 		}
 
 		$payment = $this->payments->pending_for_order($order, 'cashfree');
+		log_message('info', 'Cashfree pay - Order ID: '.$order->id.', Payment ID: '.$payment->id.', Gateway Order ID: '.($payment->gateway_order_id ?: 'empty'));
+
 		if (empty($payment->gateway_order_id))
 		{
 			$created = $this->cashfree_gateway->create_order($order, $payment);
+			log_message('info', 'Cashfree order create result: '.json_encode($created));
 			$this->payments->log('order.create', $payment->id, $order->id, array_get($created, 'request', array()), array_get($created, 'response', array_get($created, 'order', array())), 'cashfree');
 			if ( ! $created['success'])
 			{
+				log_message('error', 'Cashfree order creation failed: '.$created['message']);
 				$this->session->set_flashdata('error', 'Cashfree order could not be created: '.$created['message']);
 				redirect('account/orders/'.$order->id);
 			}
-			$this->payments->attach_gateway_order($payment->id, $created['order']['order_id'], json_encode($created['order']));
+			$this->payments->attach_gateway_order($payment->id, $created['order']['order_id'], $created['order']);
 			$payment = $this->payments->find($payment->id);
 		}
 
