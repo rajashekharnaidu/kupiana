@@ -95,9 +95,9 @@ class Cashfree_gateway
 			'order_currency' => 'INR',
 			'customer_details' => array(
 				'customer_id' => 'customer_'.$order->user_id,
-				'customer_name' => $order->first_name.($order->last_name ? ' '.$order->last_name : ''),
-				'customer_email' => $order->email,
-				'customer_phone' => $order->phone,
+				'customer_name' => trim($order->first_name.($order->last_name ? ' '.$order->last_name : '')) ?: 'Customer',
+				'customer_email' => $order->email ?: 'noemail@example.com',
+				'customer_phone' => $order->phone ?: '+919999999999',
 			),
 		);
 
