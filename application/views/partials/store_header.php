@@ -17,7 +17,9 @@ $mega_menu = isset($mega_menu) ? $mega_menu : array();
 ?>
 <div class="announcement-bar">
 	<div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
-		<span><i class="fa-solid fa-truck-fast me-2"></i>Free shipping on orders above <?php echo money(999); ?></span>
+		<span>
+			<!-- <i class="fa-solid fa-truck-fast me-2"></i>Free shipping on orders above <?php echo money(999); ?> -->
+		</span>
 		<span class="d-none d-md-inline">
 			<i class="fa-solid fa-headset me-2"></i>
 			<?php echo html_escape(array_get($app, 'support_phone', '')); ?>
@@ -27,17 +29,17 @@ $mega_menu = isset($mega_menu) ? $mega_menu : array();
 
 <header class="store-header" id="storeHeader">
 	<div class="container">
-		<div class="header-main d-flex align-items-center gap-3">
+		<div class="header-main d-flex align-items-center gap-3 justify-content-center position-relative">
 
-			<button type="button" class="btn btn-icon d-lg-none" data-mobile-nav-toggle aria-label="Menu">
+			<button type="button" class="btn btn-icon d-lg-none position-absolute start-0" data-mobile-nav-toggle aria-label="Menu">
 				<i class="fa-solid fa-bars"></i>
 			</button>
 
-			<a class="store-brand" href="<?php echo site_url(); ?>">
+			<a class="store-brand position-absolute start-0 ms-lg-0" href="<?php echo site_url(); ?>">
 				<img class="brand-logo brand-logo-store" src="<?php echo base_url(array_get($app, 'logo', 'public/assets/images/kupiana-logo-512.png')); ?>" alt="<?php echo html_escape($site_name); ?> logo">
 			</a>
 
-			<form class="header-search flex-grow-1 d-none d-md-block" action="<?php echo site_url('search'); ?>" method="get" role="search">
+			<form class="header-search d-none d-md-block" action="<?php echo site_url('search'); ?>" method="get" role="search" style="width: 100%; max-width: 500px;">
 				<div class="search-wrap">
 					<i class="fa-solid fa-magnifying-glass"></i>
 					<input type="search" name="q" class="form-control" placeholder="Search for products, brands and more…"
@@ -48,7 +50,7 @@ $mega_menu = isset($mega_menu) ? $mega_menu : array();
 				</div>
 			</form>
 
-			<div class="header-actions d-flex align-items-center gap-1 ms-auto">
+			<div class="header-actions d-flex align-items-center gap-1 position-absolute end-0">
 
 				<?php if ($current_user): ?>
 					<div class="dropdown">
