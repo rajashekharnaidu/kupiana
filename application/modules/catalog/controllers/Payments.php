@@ -36,7 +36,7 @@ class Payments extends Store_Controller
 		if (empty($payment->gateway_order_id))
 		{
 			$created = $this->cashfree_gateway->create_order($order, $payment);
-			$this->payments->log('order.create', $payment->id, $order->id, array_get($created, 'request', array()), array_get($created, 'response', array_get($created, 'order', array())));
+			$this->payments->log('order.create', $payment->id, $order->id, array_get($created, 'request', array()), array_get($created, 'response', array_get($created, 'order', array())), 'cashfree');
 			if ( ! $created['success'])
 			{
 				$this->session->set_flashdata('error', 'Cashfree order could not be created: '.$created['message']);
@@ -96,7 +96,7 @@ class Payments extends Store_Controller
 		$body = file_get_contents('php://input');
 		$signature = isset($_SERVER['HTTP_X_CF_SIGNATURE']) ? $_SERVER['HTTP_X_CF_SIGNATURE'] : '';
 		$payload = json_decode((string) $body, TRUE);
-		$this->payments->log('webhook.received', NULL, NULL, array('headers' => array('x-cf-signature' => $signature)), is_array($payload) ? $payload : array('raw' => $body));
+		$this->payments->log('webhook.received', NULL, NULL, array('headers' => array('x-cf-signature' => $signature)), is_array($payload) ? $payload : array('raw' => $body), 'cashfree');
 
 		if ( ! $this->cashfree_gateway->verify_webhook_signature(array_get($payload, 'data.order_id', ''), $signature, $payload))
 		{

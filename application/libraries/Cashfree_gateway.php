@@ -156,15 +156,20 @@ class Cashfree_gateway
 	 */
 	protected function make_request($method, $endpoint, array $body = array())
 	{
+		if ( ! function_exists('curl_init'))
+		{
+			log_message('error', 'cURL is not installed on this server.');
+			return NULL;
+		}
+
 		$url = $this->base_url.$endpoint;
 		$headers = array(
-			'Content-Type' => 'application/json',
-			'X-Client-Id' => $this->app_id,
-			'X-Client-Secret' => $this->secret_key,
-			'x-api-version' => '2023-08-01',
+			'Content-Type: application/json',
+			'X-Client-Id: '.$this->app_id,
+			'X-Client-Secret: '.$this->secret_key,
+			'x-api-version: 2023-08-01',
 		);
 
-		$this->ci->load->library('curl');
 		$curl = curl_init();
 
 		curl_setopt_array($curl, array(
@@ -172,12 +177,13 @@ class Cashfree_gateway
 			CURLOPT_RETURNTRANSFER => TRUE,
 			CURLOPT_ENCODING => '',
 			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 0,
+			CURLOPT_TIMEOUT => 30,
 			CURLOPT_FOLLOWLOCATION => TRUE,
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => $method,
 			CURLOPT_POSTFIELDS => json_encode($body),
-			CURLOPT_HTTPHEADER => $this->build_headers($headers),
+			CURLOPT_HTTPHEADER => $headers,
+			CURLOPT_SSL_VERIFYPEER => FALSE,
 		));
 
 		$response = curl_exec($curl);
@@ -195,21 +201,5 @@ class Cashfree_gateway
 		log_message('info', 'Cashfree API response ('.($http_code ?? 'unknown').'): '.substr($response, 0, 500));
 
 		return is_array($decoded) ? $decoded : NULL;
-	}
-
-	/**
-	 * Build header array for cURL.
-	 *
-	 * @param  array $headers
-	 * @return array
-	 */
-	protected function build_headers(array $headers)
-	{
-		$result = array();
-		foreach ($headers as $key => $value)
-		{
-			$result[] = $key.': '.$value;
-		}
-		return $result;
 	}
 }
