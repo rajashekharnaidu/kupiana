@@ -35,7 +35,7 @@ $mega_menu = isset($mega_menu) ? $mega_menu : array();
 				<i class="fa-solid fa-bars"></i>
 			</button>
 
-			<a class="store-brand d-none d-md-inline-flex" href="<?php echo site_url(); ?>">
+			<a class="store-brand" href="<?php echo site_url(); ?>">
 				<img class="brand-logo brand-logo-store" src="<?php echo base_url(array_get($app, 'logo', 'public/assets/images/kupiana-logo-512.png')); ?>" alt="<?php echo html_escape($site_name); ?> logo">
 			</a>
 
