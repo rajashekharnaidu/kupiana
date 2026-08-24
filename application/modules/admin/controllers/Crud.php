@@ -157,6 +157,9 @@ class Crud extends Admin_Controller
 			$this->merge_uploads($data);
 			$this->normalise_data($data);
 			$this->generated_defaults($data);
+
+			log_message('debug', 'Admin CRUD normalized data: ' . json_encode($data));
+
 			$rules = $this->validation_rules($data, $existing);
 			$this->form_validation->set_rules($rules);
 			if ($this->form_validation->run() === TRUE)
