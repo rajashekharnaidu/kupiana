@@ -39,7 +39,7 @@ $mega_menu = isset($mega_menu) ? $mega_menu : array();
 				<img class="brand-logo brand-logo-store" src="<?php echo base_url(array_get($app, 'logo', 'public/assets/images/kupiana-logo-512.png')); ?>" alt="<?php echo html_escape($site_name); ?> logo">
 			</a>
 
-			<form class="header-search d-none d-md-block" action="<?php echo site_url('search'); ?>" method="get" role="search" style="width: 100%; max-width: 500px;">
+			<form class="header-search d-none d-md-block" action="<?php echo site_url('search'); ?>" method="get" role="search" style="width: 100%; max-width: 700px;">
 				<div class="search-wrap">
 					<i class="fa-solid fa-magnifying-glass"></i>
 					<input type="search" name="q" class="form-control" placeholder="Search for products, brands and more…"
