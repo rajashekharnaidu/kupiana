@@ -29,17 +29,19 @@ $mega_menu = isset($mega_menu) ? $mega_menu : array();
 
 <header class="store-header" id="storeHeader">
 	<div class="container">
-		<div class="header-main d-flex align-items-center gap-3 justify-content-between justify-content-md-center position-relative">
+		<div class="header-main d-flex align-items-center gap-3">
 
-			<button type="button" class="btn btn-icon d-lg-none" data-mobile-nav-toggle aria-label="Menu">
-				<i class="fa-solid fa-bars"></i>
-			</button>
+			<div class="d-flex align-items-center gap-2 flex-shrink-0">
+				<button type="button" class="btn btn-icon d-lg-none" data-mobile-nav-toggle aria-label="Menu">
+					<i class="fa-solid fa-bars"></i>
+				</button>
 
-			<a class="store-brand" href="<?php echo site_url(); ?>">
-				<img class="brand-logo brand-logo-store" src="<?php echo base_url(array_get($app, 'logo', 'public/assets/images/kupiana-logo-512.png')); ?>" alt="<?php echo html_escape($site_name); ?> logo">
-			</a>
+				<a class="store-brand" href="<?php echo site_url(); ?>">
+					<img class="brand-logo brand-logo-store" src="<?php echo base_url(array_get($app, 'logo', 'public/assets/images/kupiana-logo-512.png')); ?>" alt="<?php echo html_escape($site_name); ?> logo">
+				</a>
+			</div>
 
-			<form class="header-search d-none d-md-block flex-grow-0" action="<?php echo site_url('search'); ?>" method="get" role="search" style="width: 100%; max-width: 700px;">
+			<form class="header-search d-none d-md-block" action="<?php echo site_url('search'); ?>" method="get" role="search" style="flex: 1; max-width: 700px; margin: 0 auto;">
 				<div class="search-wrap">
 					<i class="fa-solid fa-magnifying-glass"></i>
 					<input type="search" name="q" class="form-control" placeholder="Search for products, brands and more…"
@@ -50,7 +52,7 @@ $mega_menu = isset($mega_menu) ? $mega_menu : array();
 				</div>
 			</form>
 
-			<div class="header-actions d-flex align-items-center gap-1">
+			<div class="header-actions d-flex align-items-center gap-1 ms-auto">
 
 				<?php if ($current_user): ?>
 					<div class="dropdown">
