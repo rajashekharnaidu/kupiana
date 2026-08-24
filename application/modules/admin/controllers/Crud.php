@@ -255,7 +255,6 @@ class Crud extends Admin_Controller
 	protected function validation_rules(array $data, $existing = NULL)
 	{
 		$rules = array();
-		$is_update = $existing !== NULL;
 		foreach ($this->form_columns() as $column)
 		{
 			if ($this->is_upload_field($column->name) && (isset($data[$column->name]) || ($existing && ! empty($existing->{$column->name})))) { continue; }
@@ -264,18 +263,29 @@ class Crud extends Admin_Controller
 				$rules[] = array('field' => $column->name, 'label' => $this->column_label($column), 'rules' => 'required');
 			}
 
-			// Add unique constraint validation for fields with UNIQUE keys
+			// Add unique constraint validation for slug field
 			if ($column->name === 'slug' && isset($data['slug']) && $data['slug'] !== '')
 			{
-				$unique_rule = 'is_unique['.$this->resource['table'].'.slug';
-				if ($is_update && $existing) {
-					$unique_rule .= '.id.'.(int)$existing->id;
-				}
-				$unique_rule .= ']';
-				$rules[] = array('field' => 'slug', 'label' => $this->column_label($column), 'rules' => $unique_rule);
+				$rules[] = array('field' => 'slug', 'label' => $this->column_label($column), 'rules' => 'callback_validate_unique_slug');
 			}
 		}
 		return $rules;
+	}
+
+	/** Validate slug is unique, excluding current record on update. */
+	public function validate_unique_slug($slug)
+	{
+		$id = $this->input->post('id', TRUE);
+		$table = $this->resource['table'];
+		$this->db->select('id')->from($table)->where('slug', $slug);
+		if ($id) { $this->db->where('id !=', (int)$id); }
+		$existing = $this->db->limit(1)->get()->row();
+		if ($existing)
+		{
+			$this->form_validation->set_message('validate_unique_slug', 'The {field} field must contain a unique value.');
+			return FALSE;
+		}
+		return TRUE;
 	}
 
 	/** @param object $column @return string */
