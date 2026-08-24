@@ -95,7 +95,6 @@ $config['payment_statuses'] = array(
 );
 
 $config['payment_methods'] = array(
-	'razorpay' => 'Razorpay',
 	'cod'      => 'Cash on Delivery',
 	'wallet'   => 'Wallet',
 	'bank_transfer' => 'Bank Transfer',

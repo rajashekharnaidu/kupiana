@@ -63,7 +63,7 @@ class Payment_model extends MY_Model
 	 * @param  string $gateway
 	 * @return object
 	 */
-	public function pending_for_order($order, $gateway = 'razorpay')
+	public function pending_for_order($order, $gateway = 'cashfree')
 	{
 		$existing = $this->latest_for_order($order->id);
 		if ($existing && $existing->status === 'pending' && $existing->gateway === $gateway)
@@ -89,7 +89,7 @@ class Payment_model extends MY_Model
 	}
 
 	/**
-	 * Attach a Razorpay order id to a payment.
+	 * Attach a gateway order id to a payment.
 	 *
 	 * @param  int    $payment_id
 	 * @param  string $gateway_order_id
@@ -182,13 +182,13 @@ class Payment_model extends MY_Model
 	 * @param  array    $response
 	 * @return void
 	 */
-	public function log($event, $payment_id = NULL, $order_id = NULL, array $request = array(), array $response = array())
+	public function log($event, $payment_id = NULL, $order_id = NULL, array $request = array(), array $response = array(), $gateway = 'cashfree')
 	{
 		$now = date('Y-m-d H:i:s');
 		$this->db->insert('payment_logs', array(
 			'payment_id' => $payment_id ? (int) $payment_id : NULL,
 			'order_id' => $order_id ? (int) $order_id : NULL,
-			'gateway' => 'razorpay',
+			'gateway' => (string) $gateway,
 			'event' => $event,
 			'request' => json_encode($request),
 			'response' => json_encode($response),

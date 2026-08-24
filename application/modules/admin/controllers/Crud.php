@@ -21,7 +21,6 @@ class Crud extends Admin_Controller
 		$this->resource_key = strtolower(isset($parts[1]) ? $parts[1] : '');
 		$nested = array(
 			'payments/logs' => 'payment-logs',
-			'payments/razorpay' => 'payments',
 			'inventory/stock-in' => 'stock-movements',
 			'inventory/stock-out' => 'stock-movements',
 			'inventory/adjustments' => 'stock-adjustments',

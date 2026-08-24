@@ -63,7 +63,6 @@ $config['admin_menu'] = array(
 		'permission' => 'payments.view',
 		'children' => array(
 			array('key' => 'payments.all',      'label' => 'Transactions',  'uri' => 'admin/payments',            'permission' => 'payments.view'),
-			array('key' => 'payments.razorpay', 'label' => 'Razorpay',      'uri' => 'admin/payments/razorpay',    'permission' => 'payments.manage'),
 			array('key' => 'payments.logs',     'label' => 'Payment Logs',  'uri' => 'admin/payments/logs',        'permission' => 'payments.view'),
 		),
 	),

@@ -36,7 +36,7 @@ class Audit
 	protected $redacted = array(
 		'password', 'password_hash', 'password_confirm', 'confirm_password',
 		'remember_token', 'reset_token', 'otp', 'otp_code', 'api_key',
-		'razorpay_key_secret', 'webhook_secret', 'csrf_test_name',
+		'webhook_secret', 'csrf_test_name',
 	);
 
 	public function __construct()
