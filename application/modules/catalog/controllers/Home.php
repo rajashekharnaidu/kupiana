@@ -7,8 +7,8 @@ class Home extends Store_Controller
 	{
 		$this->render('home', array(
 			'meta' => seo_meta(array(
-				'title' => seo_title('Organic Spices & Oils'),
-				'description' => 'Discover organic spices, fresh-ground masalas, whole spices and cold-pressed cooking oils at Kupiana.',
+				'title' => seo_title('Spices & Oils'),
+				'description' => 'Discover spices, fresh-ground masalas, whole spices and cold-pressed cooking oils at Kupiana.',
 				'canonical' => site_url(),
 			)),
 			'json_ld' => seo_json_ld_graph(array(

@@ -37,7 +37,7 @@ class Checkout extends Store_Controller
 			$this->form_validation->set_rules('city', 'City', 'required|max_length[100]');
 			$this->form_validation->set_rules('state', 'State', 'required|max_length[100]');
 			$this->form_validation->set_rules('postal_code', 'PIN Code', 'required|max_length[20]');
-			$this->form_validation->set_rules('payment_method', 'Payment Method', 'required|in_list[cod,razorpay]');
+			$this->form_validation->set_rules('payment_method', 'Payment Method', 'required|in_list[cod,razorpay,cashfree]');
 
 			if ($this->form_validation->run() === TRUE)
 			{
@@ -49,6 +49,10 @@ class Checkout extends Store_Controller
 					if ($result['order']->payment_method === 'razorpay')
 					{
 						redirect('payments/razorpay/pay/'.$result['order']->id);
+					}
+					elseif ($result['order']->payment_method === 'cashfree')
+					{
+						redirect('payments/cashfree/pay/'.$result['order']->id);
 					}
 					redirect('checkout/success/'.$result['order']->id);
 				}
@@ -62,6 +66,7 @@ class Checkout extends Store_Controller
 			'totals' => $this->totals($items),
 			'default_address' => $this->default_address(),
 			'razorpay_available' => (bool) $this->settings->get_bool('razorpay_enabled', FALSE),
+			'cashfree_available' => (bool) getenv('CASHFREE_APP_ID'),
 			'meta' => seo_meta(array('title' => seo_title('Checkout'), 'canonical' => site_url('checkout'), 'robots' => 'noindex,follow')),
 		));
 	}

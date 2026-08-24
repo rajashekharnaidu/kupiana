@@ -5,7 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Storefront footer: trust badges, newsletter, link columns, payment methods.
  */
 ?>
-<section class="trust-strip">
+<!-- <section class="trust-strip">
 	<div class="container">
 		<div class="row g-4">
 			<?php
@@ -29,9 +29,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			<?php endforeach; ?>
 		</div>
 	</div>
-</section>
+</section> -->
 
-<section class="newsletter-band">
+<!-- <section class="newsletter-band">
 	<div class="container">
 		<div class="row align-items-center g-4">
 			<div class="col-lg-6">
@@ -54,7 +54,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			</div>
 		</div>
 	</div>
-</section>
+</section> -->
 
 <footer class="store-footer">
 	<div class="container">
@@ -74,7 +74,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				</ul>
 				<div class="social-links">
 					<a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-					<a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+					<a href="https://www.instagram.com/kupiana.naturals" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
 					<a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
 					<a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
 				</div>

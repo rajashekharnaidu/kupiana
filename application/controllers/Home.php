@@ -17,8 +17,8 @@ class Home extends Store_Controller
 			'offers' => $this->store->offers(4),
 			'testimonials' => $this->store->testimonials(6),
 			'meta' => seo_meta(array(
-				'title' => seo_title('Organic Spices & Oils'),
-				'description' => 'Shop organic spices, fresh-ground masalas, whole spices and cold-pressed cooking oils at Kupiana.',
+				'title' => seo_title('Spices & Oils'),
+				'description' => 'Shop spices, fresh-ground masalas, whole spices and cold-pressed cooking oils at Kupiana.',
 			)),
 		));
 	}

@@ -14,7 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /* Brand ---------------------------------------------------------------- */
 $config['app'] = array(
 	'name'        => 'Kupiana',
-	'tagline'     => 'Organic spices and oils, delivered.',
+	'tagline'     => 'Spices and oils, delivered.',
 	'version'     => '1.0.0',
 	'logo'        => 'public/assets/images/kupiana-logo-512.png',
 	'favicon'     => 'public/assets/images/favicon.png',

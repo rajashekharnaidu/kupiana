@@ -3,7 +3,7 @@
 	<div class="container">
 		<div class="row align-items-center g-4">
 			<div class="col-lg-7">
-				<span class="badge badge-soft badge-soft-primary mb-3">Organic spices &amp; cold-pressed oils</span>
+				<span class="badge badge-soft badge-soft-primary mb-3">Spices &amp; cold-pressed oils</span>
 				<h1 class="display-5 fw-bold mb-3"><?php echo html_escape($page->title); ?></h1>
 				<p class="lead text-muted mb-4">
 					Kupiana brings together fresh-ground spices, whole masalas and cold-pressed cooking oils for
@@ -11,7 +11,7 @@
 				</p>
 				<div class="d-flex flex-wrap gap-2">
 					<a href="<?php echo site_url('shop'); ?>" class="btn btn-primary btn-lg">
-						<i class="fa-solid fa-seedling me-2"></i>Shop Organic Pantry
+						<i class="fa-solid fa-seedling me-2"></i>Shop Pantry
 					</a>
 					<a href="<?php echo site_url('contact'); ?>" class="btn btn-outline-secondary btn-lg">Talk to Support</a>
 				</div>
@@ -19,7 +19,7 @@
 			<div class="col-lg-5">
 				<div class="card shadow-sm border-0 overflow-hidden">
 					<img src="<?php echo base_url('public/assets/images/store-hero.jpg'); ?>"
-					     alt="<?php echo html_escape($site_name); ?> organic spices and cold-pressed oils"
+					     alt="<?php echo html_escape($site_name); ?> spices and cold-pressed oils"
 					     class="img-fluid" loading="eager" fetchpriority="high" width="1400" height="1050">
 				</div>
 			</div>

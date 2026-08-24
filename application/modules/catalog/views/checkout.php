@@ -30,7 +30,8 @@ $phone = $current_user && $current_user->phone ? $current_user->phone : ($addres
 			<div class="card"><div class="card-body">
 				<h2 class="h5 mb-3">Payment</h2>
 				<div class="form-check border rounded p-3 ps-5 mb-2"><input class="form-check-input" type="radio" name="payment_method" value="cod" id="pay_cod" checked><label class="form-check-label fw-semibold" for="pay_cod">Cash on Delivery</label><div class="small text-muted">Pay when the order arrives.</div></div>
-				<div class="form-check border rounded p-3 ps-5"><input class="form-check-input" type="radio" name="payment_method" value="razorpay" id="pay_razorpay"><label class="form-check-label fw-semibold" for="pay_razorpay">Razorpay Online Payment</label><div class="small text-muted"><?php echo $razorpay_available ? 'Pay securely with card, UPI, wallet or netbanking.' : 'Keys are not configured locally; the Phase 8 offline simulator will be used.'; ?></div></div>
+				<div class="form-check border rounded p-3 ps-5 mb-2"><input class="form-check-input" type="radio" name="payment_method" value="razorpay" id="pay_razorpay"><label class="form-check-label fw-semibold" for="pay_razorpay">Razorpay Online Payment</label><div class="small text-muted"><?php echo $razorpay_available ? 'Pay securely with card, UPI, wallet or netbanking.' : 'Keys are not configured locally; the Phase 8 offline simulator will be used.'; ?></div></div>
+				<div class="form-check border rounded p-3 ps-5"><input class="form-check-input" type="radio" name="payment_method" value="cashfree" id="pay_cashfree"><label class="form-check-label fw-semibold" for="pay_cashfree">Cashfree Payment Gateway</label><div class="small text-muted"><?php echo $cashfree_available ? 'Pay securely with multiple payment methods.' : 'Not configured.'; ?></div></div>
 			</div></div>
 		</div>
 		<div class="col-lg-4">
