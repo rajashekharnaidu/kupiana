@@ -6,7 +6,7 @@ $last = $current_user ? $current_user->last_name : ($address ? $address->last_na
 $email = $current_user ? $current_user->email : '';
 $phone = $current_user && $current_user->phone ? $current_user->phone : ($address ? $address->phone : '');
 ?>
-<section class="py-4 border-bottom bg-light"><div class="container"><h1 class="h3 mb-1">Checkout</h1><p class="text-muted mb-0">Place your order. Razorpay is added in Phase 8; COD is available now.</p></div></section>
+<section class="py-4 border-bottom bg-light"><div class="container"><h1 class="h3 mb-1">Checkout</h1><p class="text-muted mb-0">Place your order and choose a payment method.</p></div></section>
 <section class="py-5"><div class="container">
 	<form method="post" action="<?php echo site_url('checkout'); ?>" class="row g-4" data-validate>
 		<input type="hidden" name="<?php echo html_escape($this->security->get_csrf_token_name()); ?>" value="<?php echo html_escape($this->security->get_csrf_hash()); ?>">

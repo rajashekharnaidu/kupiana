@@ -85,7 +85,6 @@ $route['admin/backups/restore/(:num)'] = 'admin/backups/restore/$1';
 $route['admin/audit-logs'] = 'admin/audit_logs/index';
 $route['admin/audit-logs/export'] = 'admin/audit_logs/export';
 $route['admin/payments/logs'] = 'admin/crud/index/payment-logs';
-$route['admin/payments/razorpay'] = 'admin/crud/index/payments';
 $route['admin/payments/view/(:num)'] = 'admin/payments/view/$1';
 $route['admin/payments/capture/(:num)'] = 'admin/payments/capture/$1';
 $route['admin/payments/refund/(:num)'] = 'admin/payments/refund/$1';
