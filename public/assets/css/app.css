@@ -509,7 +509,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--k-text); }
 }
 .brand-logo-store {
 	width: 86px;
-	height: 86px;
+	height: 70px;
 }
 .brand-logo-admin {
 	width: 54px;
