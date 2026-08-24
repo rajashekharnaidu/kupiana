@@ -72,9 +72,14 @@ class Payments extends Store_Controller
 			}
 
 			log_message('info', '[✓] Order created successfully in Cashfree');
-			log_message('info', 'Cashfree Order ID: '.$created['order']['order_id']);
 
-			$this->payments->attach_gateway_order($payment->id, $created['order']['order_id'], $created['order']);
+			$order_response = $created['order'];
+			$gateway_order_id = isset($order_response['cf_order_id']) ? $order_response['cf_order_id'] :
+								(isset($order_response['order_id']) ? $order_response['order_id'] : NULL);
+
+			log_message('info', 'Cashfree Order ID: '.$gateway_order_id);
+
+			$this->payments->attach_gateway_order($payment->id, $gateway_order_id, $order_response);
 			log_message('info', '[✓] Gateway Order ID attached to payment record');
 
 			$payment = $this->payments->find($payment->id);

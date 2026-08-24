@@ -11,7 +11,8 @@ class Cashfree_gateway
 	protected $ci;
 	protected $app_id;
 	protected $secret_key;
-	protected $base_url = 'https://api.cashfree.com/pg';
+	// protected $base_url = 'https://api.cashfree.com/pg';
+	protected $base_url = 'https://sandbox.cashfree.com/pg';
 	protected $sandbox_url = 'https://sandbox.cashfree.com/pg';
 	protected $is_sandbox = FALSE;
 
@@ -88,23 +89,15 @@ class Cashfree_gateway
 
 		log_message('info', '[✓] Cashfree credentials are present');
 
-		$order_id = 'order_'.$order->id.'_'.time();
-		log_message('info', 'Generated Cashfree Order ID: '.$order_id);
-
+		// Build request body matching working Postman request
 		$request_body = array(
-			'order_id' => $order_id,
 			'order_amount' => (float) $order->total_amount,
 			'order_currency' => 'INR',
-			'order_note' => 'Order for '.$order->order_number,
 			'customer_details' => array(
 				'customer_id' => 'customer_'.$order->user_id,
 				'customer_name' => $order->first_name.($order->last_name ? ' '.$order->last_name : ''),
 				'customer_email' => $order->email,
 				'customer_phone' => $order->phone,
-			),
-			'order_meta' => array(
-				'notify_url' => site_url('payments/cashfree/webhook'),
-				'return_url' => site_url('payments/cashfree/verify'),
 			),
 		);
 
@@ -115,11 +108,19 @@ class Cashfree_gateway
 			log_message('info', 'Calling Cashfree API: POST /orders');
 			$response = $this->make_request('POST', '/orders', $request_body);
 
-			if ($response && isset($response['order_id']))
+			if ($response && (isset($response['cf_order_id']) || isset($response['order_id'])))
 			{
 				log_message('info', '[✓] Order created successfully');
-				log_message('info', 'Cashfree Order ID: '.$response['order_id']);
-				log_message('info', 'Order Status: '.$response['order_status']);
+				$order_id_field = isset($response['cf_order_id']) ? 'cf_order_id' : 'order_id';
+				log_message('info', 'Cashfree Order ID: '.$response[$order_id_field]);
+				if (isset($response['order_status']))
+				{
+					log_message('info', 'Order Status: '.$response['order_status']);
+				}
+				if (isset($response['payment_links']) && count($response['payment_links']) > 0)
+				{
+					log_message('info', 'Payment Link: '.$response['payment_links'][0]['url']);
+				}
 				if (isset($response['payments_links']) && count($response['payments_links']) > 0)
 				{
 					log_message('info', 'Payment Link: '.$response['payments_links'][0]['url']);
@@ -188,10 +189,14 @@ class Cashfree_gateway
 			$response = json_decode($payment->gateway_response, TRUE);
 			log_message('info', 'Gateway Response: '.json_encode($response));
 
-			if (isset($response['payments_links']) && is_array($response['payments_links']))
+			// Try both payment_links and payments_links formats
+			$links = isset($response['payment_links']) ? $response['payment_links'] :
+					 (isset($response['payments_links']) ? $response['payments_links'] : NULL);
+
+			if ($links && is_array($links))
 			{
-				log_message('info', 'Found '.count($response['payments_links']).' payment link(s)');
-				foreach ($response['payments_links'] as $link)
+				log_message('info', 'Found '.count($links).' payment link(s)');
+				foreach ($links as $link)
 				{
 					if (isset($link['url']))
 					{
@@ -276,7 +281,8 @@ class Cashfree_gateway
 			'Content-Type: application/json',
 			'X-Client-Id: '.$this->app_id,
 			'X-Client-Secret: '.substr($this->secret_key, 0, 10).'...',
-			'x-api-version: 2023-08-01',
+			'x-api-version: 2025-01-01',
+			'Accept: application/json',
 		);
 		log_message('info', 'Headers (with masked secret): '.json_encode($headers));
 		log_message('info', 'Request Body: '.json_encode($body));
@@ -297,7 +303,8 @@ class Cashfree_gateway
 				'Content-Type: application/json',
 				'X-Client-Id: '.$this->app_id,
 				'X-Client-Secret: '.$this->secret_key,
-				'x-api-version: 2023-08-01',
+				'x-api-version: 2025-01-01',
+				'Accept: application/json',
 			),
 			CURLOPT_SSL_VERIFYPEER => FALSE,
 		));
