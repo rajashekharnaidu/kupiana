@@ -60,11 +60,30 @@ class Store_model extends CI_Model
 			foreach ($rows as $row)
 			{
 				$row->children = array();
+				$row->products = array();
 				$parent_id = (int) $row->parent_id;
 				if ($parent_id > 0) { $children[$parent_id][] = $row; }
 				else { $parents[$row->id] = $row; }
 			}
-			foreach ($parents as $id => $parent) { $parent->children = isset($children[$id]) ? $children[$id] : array(); }
+			foreach ($parents as $id => $parent)
+			{
+				$parent->children = isset($children[$id]) ? $children[$id] : array();
+
+				// Fetch products for parent category only (not subcategories)
+				$products = $this->db->select('products.id, products.name, products.slug', FALSE)
+					->distinct()
+					->from('products')
+					->join('product_categories', 'product_categories.product_id = products.id')
+					->where('product_categories.category_id', (int) $parent->id)
+					->where('products.status', 'active')
+					->where('products.deleted_at IS NULL', NULL, FALSE)
+					->order_by('products.is_featured', 'DESC')
+					->order_by('products.sold_count', 'DESC')
+					->limit(6)
+					->get()->result();
+
+				$parent->products = $products;
+			}
 			return array_values($parents);
 		});
 	}

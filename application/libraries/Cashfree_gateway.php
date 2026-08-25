@@ -189,7 +189,7 @@ class Cashfree_gateway
 			$response = json_decode($payment->gateway_response, TRUE);
 			log_message('info', 'Gateway Response: '.json_encode($response));
 
-			// Try both payment_links and payments_links formats
+			// Try both payment_links and payments_links formats (legacy)
 			$links = isset($response['payment_links']) ? $response['payment_links'] :
 					 (isset($response['payments_links']) ? $response['payments_links'] : NULL);
 
@@ -206,7 +206,18 @@ class Cashfree_gateway
 					}
 				}
 			}
-			log_message('error', '[✗] No payment links in gateway_response');
+
+			// New API format - use payment_session_id to build the link
+			if (isset($response['payment_session_id']) && !empty($response['payment_session_id']))
+			{
+				log_message('info', '[✓] Found payment_session_id: '.$response['payment_session_id']);
+				$payment_link = 'https://sandbox.cashfree.com/payments/'.$response['payment_session_id'];
+				log_message('info', '[✓] Generated payment link: '.$payment_link);
+				log_message('info', '---------- GET PAYMENT LINK SUCCESS ----------');
+				return $payment_link;
+			}
+
+			log_message('error', '[✗] No payment links or payment_session_id in gateway_response');
 		}
 		else
 		{

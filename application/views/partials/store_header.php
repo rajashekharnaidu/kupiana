@@ -128,6 +128,17 @@ $mega_menu = isset($mega_menu) ? $mega_menu : array();
 												<?php echo html_escape($child->name); ?></a></li>
 										<?php endforeach; ?>
 									</ul>
+									<?php if (isset($column->products) && !empty($column->products)): ?>
+									<div class="mt-3 pt-2 border-top">
+										<p class="small fw-semibold mb-2">Featured Products</p>
+										<ul class="small">
+											<?php foreach ($column->products as $product): ?>
+											<li><a href="<?php echo site_url('products/'.$product->slug); ?>" class="text-decoration-none text-muted">
+												<?php echo html_escape(substr($product->name, 0, 28)); ?><?php echo strlen($product->name) > 28 ? '...' : ''; ?></a></li>
+											<?php endforeach; ?>
+										</ul>
+									</div>
+									<?php endif; ?>
 								</div>
 							<?php endforeach; ?>
 						</div>
@@ -136,7 +147,6 @@ $mega_menu = isset($mega_menu) ? $mega_menu : array();
 				</li>
 
 				<li><a href="<?php echo site_url('deals'); ?>">Today's Deals</a></li>
-				<li><a href="<?php echo site_url('brands'); ?>">Brands</a></li>
 				<li><a href="<?php echo site_url('offers'); ?>">Offers</a></li>
 				<li><a href="<?php echo site_url('blog'); ?>">Blog</a></li>
 				<li><a href="<?php echo site_url('track-order'); ?>">Track Order</a></li>

@@ -18,8 +18,8 @@ $config['app'] = array(
 	'version'     => '1.0.0',
 	'logo'        => 'public/assets/images/kupiana-logo-512.png',
 	'favicon'     => 'public/assets/images/favicon.png',
-	'support_email' => 'support@kupiana.test',
-	'support_phone' => '+91 00000 00000',
+	'support_email' => 'hello.kupiana@gmail.com',
+	'support_phone' => '+91 8310542593',
 );
 
 /* Currency & locale ---------------------------------------------------- */

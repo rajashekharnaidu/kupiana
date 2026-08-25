@@ -234,9 +234,7 @@ class Order_model extends CI_Model
 	/** @param array $items @return float */
 	protected function shipping_amount(array $items)
 	{
-		$subtotal = 0;
-		foreach ($items as $item) { $subtotal += (float) $item->unit_price * (int) $item->quantity; }
-		return $subtotal >= 999 ? 0.0 : 99.0;
+		return 0.0;
 	}
 
 	/** @param array $input @return array */

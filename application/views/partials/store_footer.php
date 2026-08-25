@@ -85,8 +85,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				'Shop' => array(
 					'All Products' => 'shop',
 					"Today's Deals" => 'deals',
-					'Brands'        => 'brands',
-					'Offers'        => 'offers',
+						'Offers'        => 'offers',
 					'New Arrivals'  => 'shop?sort=created_at',
 				),
 				'My Account' => array(
@@ -94,7 +93,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					'My Orders'    => 'account/orders',
 					'Wishlist'     => 'wishlist',
 					'Track Order'  => 'track-order',
-					'Returns'      => 'account/returns',
 				),
 				'Company' => array(
 					'About Us'  => 'about',
@@ -105,8 +103,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				'Policies' => array(
 					'Privacy Policy'  => 'privacy-policy',
 					'Terms of Use'    => 'terms',
-					'Return Policy'   => 'return-policy',
-					'Shipping Policy' => 'shipping-policy',
 				),
 			);
 

@@ -60,8 +60,8 @@ class Cart extends Store_Controller
 	protected function totals(array $items)
 	{
 		$subtotal = 0; foreach ($items as $item) { $subtotal += (float) $item->unit_price * (int) $item->quantity; }
-		$shipping = $subtotal >= (float) $this->settings->get('free_shipping_threshold', 999) || $subtotal <= 0 ? 0 : (float) $this->settings->get('flat_shipping_rate', 79);
-		return array('subtotal' => $subtotal, 'shipping' => $shipping, 'total' => $subtotal + $shipping);
+		$shipping = 0;
+		return array('subtotal' => $subtotal, 'shipping' => $shipping, 'total' => $subtotal);
 	}
 
 	protected function variant_price($variant_id, $fallback)

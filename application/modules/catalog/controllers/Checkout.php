@@ -99,6 +99,7 @@ class Checkout extends Store_Controller
 			'items' => $items,
 			'totals' => $this->totals($items),
 			'default_address' => $this->default_address(),
+			'saved_addresses' => $this->saved_addresses(),
 			'cashfree_available' => $this->cashfree_gateway->enabled(),
 			'meta' => seo_meta(array('title' => seo_title('Checkout'), 'canonical' => site_url('checkout'), 'robots' => 'noindex,follow')),
 		));
@@ -130,8 +131,8 @@ class Checkout extends Store_Controller
 	{
 		$subtotal = 0;
 		foreach ($items as $item) { $subtotal += (float) $item->unit_price * (int) $item->quantity; }
-		$shipping = $subtotal >= 999 ? 0 : 99;
-		return array('subtotal' => $subtotal, 'shipping' => $shipping, 'total' => $subtotal + $shipping);
+		$shipping = 0;
+		return array('subtotal' => $subtotal, 'shipping' => $shipping, 'total' => $subtotal);
 	}
 
 	/**
@@ -141,5 +142,14 @@ class Checkout extends Store_Controller
 	{
 		if ( ! $this->auth->check()) { return NULL; }
 		return $this->db->from('addresses')->where('user_id', (int) $this->auth->id())->where('deleted_at IS NULL', NULL, FALSE)->order_by('is_default', 'DESC')->order_by('id', 'DESC')->limit(1)->get()->row();
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function saved_addresses()
+	{
+		if ( ! $this->auth->check()) { return array(); }
+		return $this->db->from('addresses')->where('user_id', (int) $this->auth->id())->where('deleted_at IS NULL', NULL, FALSE)->order_by('is_default', 'DESC')->order_by('id', 'DESC')->get()->result();
 	}
 }

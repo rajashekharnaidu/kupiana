@@ -429,7 +429,9 @@ class Crud extends Admin_Controller
 		{
 			if ( ! array_key_exists($column->name, $data)) { continue; }
 			if ($data[$column->name] !== '') { continue; }
-			if ($column->null === 'YES')
+			$is_nullable = isset($column->null) && $column->null === 'YES';
+			$is_json = isset($column->column_type) && strpos($column->column_type, 'json') === 0;
+			if ($is_nullable || $is_json)
 			{
 				$data[$column->name] = NULL;
 				log_message('debug', "Converted {$column->name} from empty string to NULL");

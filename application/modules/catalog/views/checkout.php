@@ -11,6 +11,34 @@ $phone = $current_user && $current_user->phone ? $current_user->phone : ($addres
 	<form method="post" action="<?php echo site_url('checkout'); ?>" class="row g-4" data-validate>
 		<input type="hidden" name="<?php echo html_escape($this->security->get_csrf_token_name()); ?>" value="<?php echo html_escape($this->security->get_csrf_hash()); ?>">
 		<div class="col-lg-8">
+			<?php if ($current_user && isset($saved_addresses) && !empty($saved_addresses)): ?>
+			<div class="card mb-4"><div class="card-body">
+				<h2 class="h5 mb-3">Select Address</h2>
+				<div id="address-list" class="row g-3">
+					<?php foreach ($saved_addresses as $addr): ?>
+					<div class="col-12">
+						<div class="form-check border rounded p-3 ps-5">
+							<input class="form-check-input address-select" type="radio" name="address_id" value="<?php echo (int) $addr->id; ?>" id="addr_<?php echo (int) $addr->id; ?>" onchange="loadAddress(<?php echo (int) $addr->id; ?>)">
+							<label class="form-check-label w-100" for="addr_<?php echo (int) $addr->id; ?>">
+								<div class="fw-semibold"><?php echo html_escape($addr->first_name.' '.$addr->last_name); ?></div>
+								<div class="small text-muted"><?php echo html_escape($addr->address_line1); ?></div>
+								<div class="small text-muted"><?php echo html_escape($addr->city.', '.$addr->state.' '.$addr->postal_code); ?></div>
+								<div class="small text-muted"><?php echo html_escape($addr->phone); ?></div>
+							</label>
+						</div>
+					</div>
+					<?php endforeach; ?>
+					<div class="col-12">
+						<div class="form-check border rounded p-3 ps-5">
+							<input class="form-check-input" type="radio" name="address_id" value="" id="addr_new" checked onchange="clearAddressSelection()">
+							<label class="form-check-label" for="addr_new">
+								<div class="fw-semibold"><i class="fa-solid fa-plus me-2"></i>Add New Address</div>
+							</label>
+						</div>
+					</div>
+				</div>
+			</div></div>
+			<?php endif; ?>
 			<div class="card mb-4"><div class="card-body">
 				<h2 class="h5 mb-3">Shipping Details</h2>
 				<div class="row g-3">
@@ -20,17 +48,16 @@ $phone = $current_user && $current_user->phone ? $current_user->phone : ($addres
 					<div class="col-md-6"><label class="form-label">Phone</label><input class="form-control" name="phone" value="<?php echo html_escape(set_value('phone', $phone)); ?>" required></div>
 					<div class="col-12"><label class="form-label">Address line 1</label><input class="form-control" name="address_line1" value="<?php echo html_escape(set_value('address_line1', $address ? $address->address_line1 : '')); ?>" required></div>
 					<div class="col-12"><label class="form-label">Address line 2</label><input class="form-control" name="address_line2" value="<?php echo html_escape(set_value('address_line2', $address ? $address->address_line2 : '')); ?>"></div>
-					<div class="col-md-4"><label class="form-label">City</label><input class="form-control" name="city" value="<?php echo html_escape(set_value('city', $address ? $address->city : '')); ?>" required></div>
-					<div class="col-md-4"><label class="form-label">State</label><input class="form-control" name="state" value="<?php echo html_escape(set_value('state', $address ? $address->state : '')); ?>" required></div>
-					<div class="col-md-2"><label class="form-label">State code</label><input class="form-control" name="state_code" value="<?php echo html_escape(set_value('state_code', $address ? $address->state_code : '29')); ?>"></div>
-					<div class="col-md-2"><label class="form-label">PIN</label><input class="form-control" name="postal_code" value="<?php echo html_escape(set_value('postal_code', $address ? $address->postal_code : '')); ?>" required></div>
+					<div class="col-md-6"><label class="form-label">City</label><input class="form-control" name="city" value="<?php echo html_escape(set_value('city', $address ? $address->city : '')); ?>" required></div>
+					<div class="col-md-6"><label class="form-label">State</label><input class="form-control" name="state" value="<?php echo html_escape(set_value('state', $address ? $address->state : '')); ?>" required></div>
+					<div class="col-md-6"><label class="form-label">PIN</label><input class="form-control" name="postal_code" value="<?php echo html_escape(set_value('postal_code', $address ? $address->postal_code : '')); ?>" required></div>
 					<div class="col-12"><label class="form-label">Order note</label><textarea class="form-control" name="customer_note" rows="3"><?php echo html_escape(set_value('customer_note')); ?></textarea></div>
 				</div>
 			</div></div>
 			<div class="card"><div class="card-body">
 				<h2 class="h5 mb-3">Payment</h2>
-				<div class="form-check border rounded p-3 ps-5 mb-2"><input class="form-check-input" type="radio" name="payment_method" value="cod" id="pay_cod" checked><label class="form-check-label fw-semibold" for="pay_cod">Cash on Delivery</label><div class="small text-muted">Pay when the order arrives.</div></div>
-				<div class="form-check border rounded p-3 ps-5"><input class="form-check-input" type="radio" name="payment_method" value="cashfree" id="pay_cashfree"><label class="form-check-label fw-semibold" for="pay_cashfree">Cashfree Payment Gateway</label><div class="small text-muted"><?php echo $cashfree_available ? 'Pay securely with card, UPI, wallet or netbanking.' : 'Not configured.'; ?></div></div>
+				<div class="form-check border rounded p-3 ps-5 mb-2"><input class="form-check-input" type="radio" name="payment_method" value="cashfree" id="pay_cashfree" checked><label class="form-check-label fw-semibold" for="pay_cashfree">Cashfree Payment Gateway</label><div class="small text-muted"><?php echo $cashfree_available ? 'Pay securely with card, UPI, wallet or netbanking.' : 'Not configured.'; ?></div></div>
+				<div class="form-check border rounded p-3 ps-5"><input class="form-check-input" type="radio" name="payment_method" value="cod" id="pay_cod"><label class="form-check-label fw-semibold" for="pay_cod">Cash on Delivery</label><div class="small text-muted">Pay when the order arrives.</div></div>
 			</div></div>
 		</div>
 		<div class="col-lg-4">
@@ -38,10 +65,29 @@ $phone = $current_user && $current_user->phone ? $current_user->phone : ($addres
 				<h2 class="h5 mb-3">Order Summary</h2>
 				<?php foreach ($items as $item): ?><div class="d-flex justify-content-between gap-3 border-bottom py-2"><div><div class="fw-semibold"><?php echo html_escape($item->name); ?></div><div class="small text-muted">Qty <?php echo (int) $item->quantity; ?></div></div><span><?php echo money($item->unit_price * $item->quantity); ?></span></div><?php endforeach; ?>
 				<div class="d-flex justify-content-between mt-3 mb-2"><span>Subtotal</span><span><?php echo money($totals['subtotal']); ?></span></div>
-				<div class="d-flex justify-content-between mb-2"><span>Shipping</span><span><?php echo money($totals['shipping']); ?></span></div>
 				<hr><div class="d-flex justify-content-between h5"><span>Payable</span><span><?php echo money($totals['total']); ?></span></div>
 				<button class="btn btn-primary w-100 mt-3" type="submit"><i class="fa-solid fa-bag-shopping me-2"></i>Place Order</button>
 			</div></div>
 		</div>
 	</form>
 </div></section>
+<script>
+function loadAddress(addressId) {
+	const addresses = <?php echo json_encode(array_map(function($a) { return (array)$a; }, isset($saved_addresses) ? $saved_addresses : [])); ?>;
+	const addr = addresses.find(a => a.id == addressId);
+	if (addr) {
+		document.querySelector('input[name="first_name"]').value = addr.first_name || '';
+		document.querySelector('input[name="last_name"]').value = addr.last_name || '';
+		document.querySelector('input[name="email"]').value = addr.email || '';
+		document.querySelector('input[name="phone"]').value = addr.phone || '';
+		document.querySelector('input[name="address_line1"]').value = addr.address_line1 || '';
+		document.querySelector('input[name="address_line2"]').value = addr.address_line2 || '';
+		document.querySelector('input[name="city"]').value = addr.city || '';
+		document.querySelector('input[name="state"]').value = addr.state || '';
+		document.querySelector('input[name="postal_code"]').value = addr.postal_code || '';
+	}
+}
+function clearAddressSelection() {
+	document.querySelectorAll('input[name="address_line1"]').forEach(el => el.value = '');
+}
+</script>

@@ -24,10 +24,36 @@ class Admin_resource_model extends MY_Model
 		$this->columns = $this->db->field_data($this->table);
 		$names = array();
 
+		// Enrich column metadata with NULL constraint info from INFORMATION_SCHEMA
+		$db_config = config_item('database') ? config_item('database')[0] : array();
+		$db_name = isset($db_config['database']) ? $db_config['database'] : 'kupiana';
+
+		$schema_info = $this->db
+			->select('COLUMN_NAME, IS_NULLABLE, COLUMN_TYPE')
+			->from('INFORMATION_SCHEMA.COLUMNS')
+			->where('TABLE_SCHEMA', $db_name)
+			->where('TABLE_NAME', $this->table)
+			->get()
+			->result_array();
+
+		$schema_map = array();
+		foreach ($schema_info as $col) {
+			$schema_map[$col['COLUMN_NAME']] = array(
+				'null' => $col['IS_NULLABLE'],
+				'column_type' => $col['COLUMN_TYPE']
+			);
+		}
+
 		foreach ($this->columns as $column)
 		{
 			$name = $column->name;
 			$names[] = $name;
+
+			// Add null and column_type from schema
+			if (isset($schema_map[$name])) {
+				$column->null = $schema_map[$name]['null'];
+				$column->column_type = $schema_map[$name]['column_type'];
+			}
 		}
 
 		$system = array('id', 'created_at', 'updated_at', 'deleted_at', 'created_by', 'updated_by');
