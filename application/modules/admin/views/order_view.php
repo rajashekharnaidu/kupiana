@@ -18,8 +18,10 @@
 				<div class="row g-3">
 					<div class="col-sm-6"><div class="text-muted small">Customer</div><div><?php echo html_escape($order->customer_name); ?></div><div class="small text-muted"><?php echo html_escape($order->customer_phone); ?></div></div>
 					<div class="col-sm-6"><div class="text-muted small">Source</div><div><?php echo html_escape(ucwords($order->source)); ?></div><div class="small text-muted"><?php echo html_escape($order->ip_address ?: 'No IP captured'); ?></div></div>
-					<div class="col-sm-6"><div class="text-muted small">Billing Address</div><pre class="small mb-0 text-wrap"><?php echo html_escape($order->billing_address ?: 'Not captured'); ?></pre></div>
-					<div class="col-sm-6"><div class="text-muted small">Shipping Address</div><pre class="small mb-0 text-wrap"><?php echo html_escape($order->shipping_address ?: 'Not captured'); ?></pre></div>
+					<?php $billing_address = json_decode($order->billing_address, TRUE); ?>
+					<div class="col-sm-6"><div class="text-muted small">Billing Address</div><?php if ($billing_address): ?><div><?php echo html_escape($billing_address['name']); ?></div><div><?php echo html_escape($billing_address['address_line1'].($billing_address['address_line2'] ? ', '.$billing_address['address_line2'] : '')); ?></div><div><?php echo html_escape($billing_address['city'].', '.$billing_address['state'].' '.$billing_address['postal_code']); ?></div><div><?php echo html_escape($billing_address['country']); ?></div><div class="small text-muted"><?php echo html_escape($billing_address['phone']); ?></div><?php else: ?><div class="text-muted">Not captured</div><?php endif; ?></div>
+					<?php $shipping_address = json_decode($order->shipping_address, TRUE); ?>
+					<div class="col-sm-6"><div class="text-muted small">Shipping Address</div><?php if ($shipping_address): ?><div><?php echo html_escape($shipping_address['name']); ?></div><div><?php echo html_escape($shipping_address['address_line1'].($shipping_address['address_line2'] ? ', '.$shipping_address['address_line2'] : '')); ?></div><div><?php echo html_escape($shipping_address['city'].', '.$shipping_address['state'].' '.$shipping_address['postal_code']); ?></div><div><?php echo html_escape($shipping_address['country']); ?></div><div class="small text-muted"><?php echo html_escape($shipping_address['phone']); ?></div><?php else: ?><div class="text-muted">Not captured</div><?php endif; ?></div>
 				</div>
 			</div>
 		</div>
