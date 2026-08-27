@@ -41,10 +41,11 @@ class Products extends Admin_Controller
 		$product = $this->product((int) $id);
 		if ( ! $product) { show_404(); }
 		include_once APPPATH.'libraries/Upload.php';
-		$upload = (new Upload())->image('image', 'products');
+		$uploader = new Upload();
+		$upload = $uploader->image('image', 'products');
 		if ($upload === FALSE)
 		{
-			$this->session->set_flashdata('error', 'Choose a valid image file.');
+			$this->session->set_flashdata('error', $uploader->error());
 			redirect('admin/products/manage/'.$product->id);
 		}
 		$now = date('Y-m-d H:i:s');
