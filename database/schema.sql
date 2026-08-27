@@ -1111,6 +1111,7 @@ CREATE TABLE `offers` (
 CREATE TABLE `orders` (
 	`id`               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`order_number`     VARCHAR(50)     NOT NULL,
+	`public_token`     VARCHAR(64)     NOT NULL COMMENT 'Opaque, unguessable id used in customer-facing URLs instead of `id`',
 	`user_id`          BIGINT UNSIGNED DEFAULT NULL COMMENT 'NULL for guest checkout',
 	`customer_name`    VARCHAR(191)    NOT NULL,
 	`customer_email`   VARCHAR(191)    NOT NULL,
@@ -1153,6 +1154,7 @@ CREATE TABLE `orders` (
 	`updated_by`       BIGINT UNSIGNED DEFAULT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `uq_orders_number` (`order_number`),
+	UNIQUE KEY `uq_orders_public_token` (`public_token`),
 	KEY `idx_orders_user` (`user_id`),
 	KEY `idx_orders_status` (`order_status`),
 	KEY `idx_orders_payment_status` (`payment_status`),

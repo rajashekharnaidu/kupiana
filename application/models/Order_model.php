@@ -45,6 +45,7 @@ class Order_model extends CI_Model
 		$this->db->trans_begin();
 		$this->db->insert('orders', array(
 			'order_number' => generate_code('ORD'),
+			'public_token' => generate_token(32),
 			'user_id' => $user_id ?: NULL,
 			'customer_name' => $name,
 			'customer_email' => strtolower(trim((string) array_get($input, 'email'))),
@@ -180,6 +181,17 @@ class Order_model extends CI_Model
 	public function find($id)
 	{
 		return $this->db->from('orders')->where('id', (int) $id)->where('deleted_at IS NULL', NULL, FALSE)->get()->row();
+	}
+
+	/**
+	 * Fetch one active order by its opaque public token (safe for customer-facing URLs).
+	 *
+	 * @param  string $public_token
+	 * @return object|null
+	 */
+	public function find_by_public_token($public_token)
+	{
+		return $this->db->from('orders')->where('public_token', (string) $public_token)->where('deleted_at IS NULL', NULL, FALSE)->get()->row();
 	}
 
 	/** @param int $cart_id @return array */

@@ -6,12 +6,24 @@
 			<div class="card">
 				<div class="card-body">
 					<h2 class="h5 mb-4">Payment Status</h2>
-					<?php if ($payment_link): ?>
+					<?php if ($payment_session_id): ?>
 						<p class="mb-3">Click the button below to proceed to Cashfree payment gateway.</p>
-						<a href="<?php echo html_escape($payment_link); ?>" class="btn btn-primary btn-lg">
+						<button type="button" id="cashfree-pay-btn" class="btn btn-primary btn-lg">
 							<i class="fa-solid fa-lock me-2"></i>Pay with Cashfree
-						</a>
+						</button>
 						<p class="small text-muted mt-3">You will be redirected to Cashfree to complete your payment securely.</p>
+						<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+						<script>
+						(function () {
+							var cashfree = Cashfree({ mode: <?php echo json_encode($is_sandbox ? 'sandbox' : 'production'); ?> });
+							document.getElementById('cashfree-pay-btn').addEventListener('click', function () {
+								cashfree.checkout({
+									paymentSessionId: <?php echo json_encode($payment_session_id); ?>,
+									redirectTarget: '_self'
+								});
+							});
+						})();
+						</script>
 					<?php else: ?>
 						<div class="alert alert-danger">
 							<i class="fa-solid fa-exclamation-circle me-2"></i>

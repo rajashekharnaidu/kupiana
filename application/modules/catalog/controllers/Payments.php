@@ -12,6 +12,7 @@ class Payments extends Store_Controller
 	{
 		parent::__construct();
 		$this->load->model('Payment_model', 'payments');
+		$this->load->model('Order_model', 'orders');
 		$this->load->library('cashfree_gateway');
 	}
 
@@ -19,15 +20,14 @@ class Payments extends Store_Controller
 	/**
 	 * Cashfree payment page for an order.
 	 *
-	 * @param  int|null $order_id
+	 * @param  string|null $token Order's opaque public_token
 	 * @return void
 	 */
-	public function cashfree_pay($order_id = NULL)
+	public function cashfree_pay($token = NULL)
 	{
 		log_message('info', '========== CASHFREE PAY PAGE LOAD START ==========');
-		log_message('info', 'Order ID: '.$order_id);
 
-		$order = $this->order_for_customer((int) $order_id);
+		$order = $this->order_for_customer($token);
 		if ( ! $order)
 		{
 			log_message('error', '[✗] Order not found for customer');
@@ -44,7 +44,7 @@ class Payments extends Store_Controller
 		{
 			log_message('info', '[!] Order already paid - redirecting to success page');
 			$this->session->set_flashdata('info', 'This order does not require another payment.');
-			redirect('checkout/success/'.$order->id);
+			redirect('checkout/success/'.$order->public_token);
 		}
 
 		log_message('info', '[✓] Order payment pending - proceeding with payment');
@@ -74,8 +74,10 @@ class Payments extends Store_Controller
 			log_message('info', '[✓] Order created successfully in Cashfree');
 
 			$order_response = $created['order'];
-			$gateway_order_id = isset($order_response['cf_order_id']) ? $order_response['cf_order_id'] :
-								(isset($order_response['order_id']) ? $order_response['order_id'] : NULL);
+			// Use the merchant order_id (not cf_order_id) - Cashfree's return_url
+			// placeholder and webhook payloads both key off this value.
+			$gateway_order_id = isset($order_response['order_id']) ? $order_response['order_id'] :
+								(isset($order_response['cf_order_id']) ? $order_response['cf_order_id'] : NULL);
 
 			log_message('info', 'Cashfree Order ID: '.$gateway_order_id);
 
@@ -90,16 +92,16 @@ class Payments extends Store_Controller
 			log_message('info', 'Existing Cashfree Order ID: '.$payment->gateway_order_id);
 		}
 
-		log_message('info', 'Retrieving payment link from gateway response...');
-		$payment_link = $this->cashfree_gateway->get_payment_link($payment);
+		log_message('info', 'Retrieving payment_session_id from gateway response...');
+		$payment_session_id = $this->cashfree_gateway->get_payment_session_id($payment);
 
-		if ($payment_link)
+		if ($payment_session_id)
 		{
-			log_message('info', '[✓] Payment link retrieved: '.$payment_link);
+			log_message('info', '[✓] payment_session_id retrieved');
 		}
 		else
 		{
-			log_message('error', '[✗] No payment link found');
+			log_message('error', '[✗] No payment_session_id found');
 		}
 
 		log_message('info', 'Rendering payment page...');
@@ -108,7 +110,8 @@ class Payments extends Store_Controller
 		$this->render('payment_cashfree', array(
 			'order' => $order,
 			'payment' => $payment,
-			'payment_link' => $payment_link,
+			'payment_session_id' => $payment_session_id,
+			'is_sandbox' => $this->cashfree_gateway->is_sandbox(),
 			'cashfree_enabled' => $this->cashfree_gateway->enabled(),
 			'meta' => seo_meta(array('title' => seo_title('Pay '.$order->order_number), 'robots' => 'noindex,follow')),
 		));
@@ -124,14 +127,11 @@ class Payments extends Store_Controller
 		log_message('info', '========== CASHFREE PAYMENT VERIFICATION START ==========');
 		log_message('info', 'Return URL callback received from Cashfree');
 
+		// The return_url redirect is unauthenticated (any query string can be
+		// forged by the browser), so it is only used to look up the payment;
+		// the actual order/payment status is fetched from Cashfree directly.
 		$order_id = (string) $this->input->get('order_id', TRUE);
-		$payment_id = (string) $this->input->get('cf_payment_id', TRUE);
-		$signature = (string) $this->input->get('cf_signature', TRUE);
-
 		log_message('info', 'Cashfree Order ID: '.$order_id);
-		log_message('info', 'Cashfree Payment ID: '.$payment_id);
-		log_message('info', 'Signature: '.$signature);
-		log_message('info', 'Query Parameters: '.json_encode($this->input->get(NULL, TRUE)));
 
 		$payment = $this->payments->find_by_gateway_order($order_id);
 		if ( ! $payment)
@@ -146,34 +146,65 @@ class Payments extends Store_Controller
 		log_message('info', 'Order ID: '.$payment->order_id);
 		log_message('info', 'Payment Status: '.$payment->status);
 
-		log_message('info', 'Verifying webhook signature...');
-		if ( ! $this->cashfree_gateway->verify_webhook_signature($order_id, $signature))
+		$order = $this->orders->find($payment->order_id);
+		if ( ! $order)
 		{
-			log_message('error', '[✗] Signature verification failed');
-			log_message('info', 'Marking payment as failed due to signature mismatch');
-			$this->payments->mark_failed($payment, 'Signature verification failed.', $this->input->get(NULL, TRUE));
+			log_message('error', '[✗] Order record not found for payment: '.$payment->order_id);
 			log_message('info', '========== CASHFREE PAYMENT VERIFICATION FAILED ==========');
-			$this->session->set_flashdata('error', 'Payment verification failed.');
-			redirect('payments/failed/'.$payment->order_id);
+			show_404();
 		}
 
-		log_message('info', '[✓] Signature verification passed');
-		log_message('info', 'Marking payment as captured...');
+		if (in_array($payment->status, array('captured'), TRUE))
+		{
+			log_message('info', '[!] Payment already captured (likely via webhook) - redirecting to success page');
+			log_message('info', '========== CASHFREE PAYMENT VERIFICATION SUCCESS ==========');
+			$this->session->set_flashdata('success', 'Payment captured successfully.');
+			redirect('checkout/success/'.$order->public_token);
+		}
 
-		$this->payments->mark_captured($payment, array(
-			'order_id' => $order_id,
-			'payment_id' => $payment_id,
-			'signature' => $signature,
-			'method' => 'cashfree',
-			'source' => 'redirect',
-		));
+		log_message('info', 'Fetching authoritative order status from Cashfree...');
+		$order_response = $this->cashfree_gateway->get_order($order_id);
+		$order_status = $order_response ? array_get($order_response, 'order_status') : NULL;
+		log_message('info', 'Order Status: '.$order_status);
 
-		log_message('info', '[✓] Payment marked as captured');
-		log_message('info', 'Redirecting to success page...');
-		log_message('info', '========== CASHFREE PAYMENT VERIFICATION SUCCESS ==========');
+		if ($order_status === 'PAID')
+		{
+			log_message('info', '[✓] Order is PAID - marking payment as captured');
 
-		$this->session->set_flashdata('success', 'Payment captured successfully.');
-		redirect('checkout/success/'.$payment->order_id);
+			$order_payments = $this->cashfree_gateway->get_order_payments($order_id);
+			$successful_payment = array();
+			foreach ($order_payments as $order_payment)
+			{
+				if (array_get($order_payment, 'payment_status') === 'SUCCESS')
+				{
+					$successful_payment = $order_payment;
+					break;
+				}
+			}
+
+			$this->payments->mark_captured($payment, array(
+				'order_id' => $order_id,
+				'payment_id' => array_get($successful_payment, 'cf_payment_id'),
+				'method' => array_get($successful_payment, 'payment_group', 'cashfree'),
+				'source' => 'redirect',
+				'order' => $order_response,
+				'payment' => $successful_payment,
+			));
+
+			log_message('info', '[✓] Payment marked as captured');
+			log_message('info', 'Redirecting to success page...');
+			log_message('info', '========== CASHFREE PAYMENT VERIFICATION SUCCESS ==========');
+
+			$this->session->set_flashdata('success', 'Payment captured successfully.');
+			redirect('checkout/success/'.$order->public_token);
+		}
+
+		log_message('error', '[✗] Order not paid (status: '.$order_status.')');
+		log_message('info', 'Marking payment as failed');
+		$this->payments->mark_failed($payment, 'Cashfree order status: '.($order_status ?: 'unknown'), (array) $order_response);
+		log_message('info', '========== CASHFREE PAYMENT VERIFICATION FAILED ==========');
+		$this->session->set_flashdata('error', 'Payment could not be verified.');
+		redirect('payments/failed/'.$order->public_token);
 	}
 
 	/**
@@ -188,8 +219,10 @@ class Payments extends Store_Controller
 		$body = file_get_contents('php://input');
 		log_message('info', 'Raw Request Body: '.$body);
 
-		$signature = isset($_SERVER['HTTP_X_CF_SIGNATURE']) ? $_SERVER['HTTP_X_CF_SIGNATURE'] : '';
+		$signature = isset($_SERVER['HTTP_X_WEBHOOK_SIGNATURE']) ? $_SERVER['HTTP_X_WEBHOOK_SIGNATURE'] : '';
+		$timestamp = isset($_SERVER['HTTP_X_WEBHOOK_TIMESTAMP']) ? $_SERVER['HTTP_X_WEBHOOK_TIMESTAMP'] : '';
 		log_message('info', 'Signature Header: '.$signature);
+		log_message('info', 'Timestamp Header: '.$timestamp);
 		log_message('info', 'All Headers: '.json_encode(getallheaders()));
 
 		$payload = json_decode((string) $body, TRUE);
@@ -204,14 +237,14 @@ class Payments extends Store_Controller
 		log_message('info', '[✓] JSON decoded successfully');
 		log_message('info', 'Payload: '.json_encode($payload));
 
-		$this->payments->log('webhook.received', NULL, NULL, array('headers' => array('x-cf-signature' => $signature)), is_array($payload) ? $payload : array('raw' => $body), 'cashfree');
+		$this->payments->log('webhook.received', NULL, NULL, array('headers' => array('x-webhook-signature' => $signature, 'x-webhook-timestamp' => $timestamp)), is_array($payload) ? $payload : array('raw' => $body), 'cashfree');
 
-		$order_id = array_get($payload, 'data.order_id', '');
+		$order_id = array_get($payload, 'data.order.order_id', '');
 		log_message('info', 'Order ID from payload: '.$order_id);
 		log_message('info', 'Event Type: '.array_get($payload, 'type', 'UNKNOWN'));
 
 		log_message('info', 'Verifying webhook signature...');
-		if ( ! $this->cashfree_gateway->verify_webhook_signature($order_id, $signature, $payload))
+		if ( ! $this->cashfree_gateway->verify_webhook_signature($signature, $body, $timestamp))
 		{
 			log_message('error', '[✗] Webhook signature verification failed');
 			$this->output->set_status_header(400)->set_output('invalid signature');
@@ -277,27 +310,33 @@ class Payments extends Store_Controller
 	/**
 	 * Payment failed page.
 	 *
-	 * @param  int|null $order_id
+	 * @param  string|null $token Order's opaque public_token
 	 * @return void
 	 */
-	public function failed($order_id = NULL)
+	public function failed($token = NULL)
 	{
-		$order = $this->order_for_customer((int) $order_id);
+		$order = $this->order_for_customer($token);
 		if ( ! $order) { show_404(); }
 		$this->render('payment_failed', array('order' => $order, 'meta' => seo_meta(array('title' => seo_title('Payment Failed'), 'robots' => 'noindex,follow'))));
 	}
 
 
 	/**
-	 * @param  int $order_id
+	 * Look up an order by its opaque public_token (never by sequential id, to
+	 * prevent enumeration). If the visitor is logged in, the order must also
+	 * belong to them; guest orders remain reachable to anyone holding the token.
+	 *
+	 * @param  string $token
 	 * @return object|null
 	 */
-	protected function order_for_customer($order_id)
+	protected function order_for_customer($token)
 	{
-		$this->db->from('orders')->where('id', (int) $order_id)->where('deleted_at IS NULL', NULL, FALSE);
+		if (empty($token)) { return NULL; }
+
+		$this->db->from('orders')->where('public_token', (string) $token)->where('deleted_at IS NULL', NULL, FALSE);
 		if ($this->auth->check())
 		{
-			$this->db->where('user_id', (int) $this->auth->id());
+			$this->db->where('(user_id IS NULL OR user_id = '.(int) $this->auth->id().')', NULL, FALSE);
 		}
 		return $this->db->get()->row();
 	}

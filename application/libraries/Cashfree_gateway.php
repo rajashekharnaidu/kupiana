@@ -11,8 +11,7 @@ class Cashfree_gateway
 	protected $ci;
 	protected $app_id;
 	protected $secret_key;
-	// protected $base_url = 'https://api.cashfree.com/pg';
-	protected $base_url = 'https://sandbox.cashfree.com/pg';
+	protected $base_url = 'https://api.cashfree.com/pg';
 	protected $sandbox_url = 'https://sandbox.cashfree.com/pg';
 	protected $is_sandbox = FALSE;
 
@@ -99,6 +98,10 @@ class Cashfree_gateway
 				'customer_email' => $order->email ?: 'noemail@example.com',
 				'customer_phone' => $order->phone ?: '+919999999999',
 			),
+			'order_meta' => array(
+				'return_url' => site_url('payments/cashfree/verify').'?order_id={order_id}',
+				'notify_url' => site_url('payments/cashfree/webhook'),
+			),
 		);
 
 		log_message('info', 'Request Body: '.json_encode($request_body));
@@ -173,84 +176,121 @@ class Cashfree_gateway
 	}
 
 	/**
-	 * Get the payment link for an order.
+	 * Get the payment_session_id for an order, for use with the Cashfree
+	 * Checkout JS SDK (cashfree.checkout({paymentSessionId, ...})).
 	 *
-	 * @param  object $payment Cashfree order response
+	 * @param  object $payment Payment record with a gateway_response column
 	 * @return string|null
 	 */
-	public function get_payment_link($payment)
+	public function get_payment_session_id($payment)
 	{
-		log_message('info', '---------- GET PAYMENT LINK START ----------');
+		log_message('info', '---------- GET PAYMENT SESSION ID START ----------');
 		log_message('info', 'Payment ID: '.$payment->id);
 
 		if (is_object($payment) && isset($payment->gateway_response))
 		{
-			log_message('info', '[✓] Payment has gateway_response');
 			$response = json_decode($payment->gateway_response, TRUE);
-			log_message('info', 'Gateway Response: '.json_encode($response));
 
-			// Try both payment_links and payments_links formats (legacy)
-			$links = isset($response['payment_links']) ? $response['payment_links'] :
-					 (isset($response['payments_links']) ? $response['payments_links'] : NULL);
-
-			if ($links && is_array($links))
-			{
-				log_message('info', 'Found '.count($links).' payment link(s)');
-				foreach ($links as $link)
-				{
-					if (isset($link['url']))
-					{
-						log_message('info', '[✓] Payment link found: '.$link['url']);
-						log_message('info', '---------- GET PAYMENT LINK SUCCESS ----------');
-						return $link['url'];
-					}
-				}
-			}
-
-			// New API format - use payment_session_id to build the link
 			if (isset($response['payment_session_id']) && !empty($response['payment_session_id']))
 			{
 				log_message('info', '[✓] Found payment_session_id: '.$response['payment_session_id']);
-				$payment_link = 'https://sandbox.cashfree.com/payments/'.$response['payment_session_id'];
-				log_message('info', '[✓] Generated payment link: '.$payment_link);
-				log_message('info', '---------- GET PAYMENT LINK SUCCESS ----------');
-				return $payment_link;
+				log_message('info', '---------- GET PAYMENT SESSION ID SUCCESS ----------');
+				return $response['payment_session_id'];
 			}
-
-			log_message('error', '[✗] No payment links or payment_session_id in gateway_response');
-		}
-		else
-		{
-			log_message('error', '[✗] Payment object missing or no gateway_response');
 		}
 
-		log_message('info', '---------- GET PAYMENT LINK FAILED ----------');
+		log_message('error', '[✗] No payment_session_id in gateway_response');
+		log_message('info', '---------- GET PAYMENT SESSION ID FAILED ----------');
 		return NULL;
 	}
 
 	/**
-	 * Verify the payment signature from Cashfree webhook.
+	 * Whether the gateway is running in sandbox mode.
 	 *
-	 * @param  string $order_id
-	 * @param  string $signature
-	 * @param  array $data
 	 * @return bool
 	 */
-	public function verify_webhook_signature($order_id, $signature, array $data = array())
+	public function is_sandbox()
+	{
+		return $this->is_sandbox;
+	}
+
+	/**
+	 * Fetch an order's current status directly from Cashfree, used to
+	 * confirm payment after the customer is redirected back to return_url
+	 * (the redirect itself is unauthenticated and must not be trusted).
+	 *
+	 * @param  string $order_id Merchant order_id (not cf_order_id)
+	 * @return array|null
+	 */
+	public function get_order($order_id)
+	{
+		log_message('info', '---------- GET CASHFREE ORDER START ----------');
+		log_message('info', 'Order ID: '.$order_id);
+
+		if ( ! $this->enabled())
+		{
+			log_message('error', '[✗] Cashfree is NOT configured - credentials missing');
+			return NULL;
+		}
+
+		$response = $this->make_request('GET', '/orders/'.rawurlencode($order_id));
+
+		log_message('info', '---------- GET CASHFREE ORDER END ----------');
+
+		return $response;
+	}
+
+	/**
+	 * Fetch the list of payment attempts for an order, used after a return_url
+	 * redirect to find the cf_payment_id of the successful payment.
+	 *
+	 * @param  string $order_id Merchant order_id (not cf_order_id)
+	 * @return array
+	 */
+	public function get_order_payments($order_id)
+	{
+		log_message('info', '---------- GET CASHFREE ORDER PAYMENTS START ----------');
+		log_message('info', 'Order ID: '.$order_id);
+
+		if ( ! $this->enabled())
+		{
+			log_message('error', '[✗] Cashfree is NOT configured - credentials missing');
+			return array();
+		}
+
+		$response = $this->make_request('GET', '/orders/'.rawurlencode($order_id).'/payments');
+
+		log_message('info', '---------- GET CASHFREE ORDER PAYMENTS END ----------');
+
+		return is_array($response) ? $response : array();
+	}
+
+	/**
+	 * Verify a Cashfree webhook signature.
+	 *
+	 * Cashfree signs "{timestamp}{raw_body}" with HMAC-SHA256 using the
+	 * client secret and base64-encodes the result, sent as the
+	 * x-webhook-signature header (x-webhook-timestamp carries the timestamp).
+	 *
+	 * @param  string $signature Value of the x-webhook-signature header
+	 * @param  string $raw_body  Raw (unparsed) webhook request body
+	 * @param  string $timestamp Value of the x-webhook-timestamp header
+	 * @return bool
+	 */
+	public function verify_webhook_signature($signature, $raw_body, $timestamp)
 	{
 		log_message('info', '---------- VERIFY WEBHOOK SIGNATURE START ----------');
-		log_message('info', 'Order ID: '.$order_id);
+		log_message('info', 'Timestamp: '.$timestamp);
 		log_message('info', 'Provided Signature: '.$signature);
 
-		if (empty($this->secret_key))
+		if (empty($this->secret_key) || empty($signature) || empty($timestamp))
 		{
-			log_message('error', '[✗] Secret key is empty');
+			log_message('error', '[✗] Secret key, signature, or timestamp is empty');
 			log_message('info', '---------- VERIFY WEBHOOK SIGNATURE FAILED ----------');
 			return FALSE;
 		}
 
-		$msg = $order_id.$this->secret_key;
-		$computed_signature = hash('sha256', $msg);
+		$computed_signature = base64_encode(hash_hmac('sha256', $timestamp.$raw_body, $this->secret_key, TRUE));
 		log_message('info', 'Computed Signature: '.$computed_signature);
 
 		$is_valid = hash_equals($computed_signature, $signature);
@@ -300,7 +340,7 @@ class Cashfree_gateway
 
 		$curl = curl_init();
 
-		curl_setopt_array($curl, array(
+		$curl_opts = array(
 			CURLOPT_URL => $url,
 			CURLOPT_RETURNTRANSFER => TRUE,
 			CURLOPT_ENCODING => '',
@@ -309,7 +349,6 @@ class Cashfree_gateway
 			CURLOPT_FOLLOWLOCATION => TRUE,
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => $method,
-			CURLOPT_POSTFIELDS => json_encode($body),
 			CURLOPT_HTTPHEADER => array(
 				'Content-Type: application/json',
 				'X-Client-Id: '.$this->app_id,
@@ -318,7 +357,14 @@ class Cashfree_gateway
 				'Accept: application/json',
 			),
 			CURLOPT_SSL_VERIFYPEER => FALSE,
-		));
+		);
+
+		if (strtoupper($method) !== 'GET')
+		{
+			$curl_opts[CURLOPT_POSTFIELDS] = json_encode($body);
+		}
+
+		curl_setopt_array($curl, $curl_opts);
 
 		log_message('info', 'Executing cURL request...');
 		$response = curl_exec($curl);

@@ -76,12 +76,12 @@ class Checkout extends Store_Controller
 					{
 						log_message('info', 'Cashfree payment selected - redirecting to payment page');
 						log_message('info', '========== CHECKOUT COMPLETED - CASHFREE PAYMENT ==========');
-						redirect('payments/cashfree/pay/'.$result['order']->id);
+						redirect('payments/cashfree/pay/'.$result['order']->public_token);
 					}
 
 					log_message('info', 'COD payment selected - redirecting to success page');
 					log_message('info', '========== CHECKOUT COMPLETED - COD PAYMENT ==========');
-					redirect('checkout/success/'.$result['order']->id);
+					redirect('checkout/success/'.$result['order']->public_token);
 				}
 
 				log_message('error', '[✗] Order creation failed: '.$result['message']);
@@ -108,18 +108,18 @@ class Checkout extends Store_Controller
 	/**
 	 * Thank-you page.
 	 *
-	 * @param  int|null $id
+	 * @param  string|null $token Order's opaque public_token
 	 * @return void
 	 */
-	public function success($id = NULL)
+	public function success($token = NULL)
 	{
-		$order = $this->db->from('orders')->where('id', (int) $id)->where('deleted_at IS NULL', NULL, FALSE)->get()->row();
+		$order = $this->db->from('orders')->where('public_token', (string) $token)->where('deleted_at IS NULL', NULL, FALSE)->get()->row();
 		if ( ! $order) { show_404(); }
-		if ($this->auth->check() && (int) $order->user_id !== (int) $this->auth->id()) { show_404(); }
+		if ($this->auth->check() && $order->user_id !== NULL && (int) $order->user_id !== (int) $this->auth->id()) { show_404(); }
 
 		$this->render('order_success', array(
 			'order' => $order,
-			'meta' => seo_meta(array('title' => seo_title('Order '.$order->order_number), 'canonical' => site_url('checkout/success/'.$order->id), 'robots' => 'noindex,follow')),
+			'meta' => seo_meta(array('title' => seo_title('Order '.$order->order_number), 'canonical' => site_url('checkout/success/'.$order->public_token), 'robots' => 'noindex,follow')),
 		));
 	}
 
