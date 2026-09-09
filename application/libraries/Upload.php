@@ -76,7 +76,7 @@ class Upload
 		$path = rtrim($config['base_path'].$relative, '/').'/';
 		if ( ! is_dir($path)) { mkdir($path, 0755, TRUE); }
 
-		$name = random_token(16).'.'.$extension;
+		$name = generate_token(16).'.'.$extension;
 		$target = $path.$name;
 		if ( ! move_uploaded_file($_FILES[$field]['tmp_name'], $target)) { return FALSE; }
 
