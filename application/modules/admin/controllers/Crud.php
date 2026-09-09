@@ -260,10 +260,11 @@ class Crud extends Admin_Controller
 	protected function validation_rules(array $data, $existing = NULL)
 	{
 		$rules = array();
+		$no_required = ! empty($this->resource['no_required']);
 		foreach ($this->form_columns() as $column)
 		{
 			if ($this->is_upload_field($column->name) && (isset($data[$column->name]) || ($existing && ! empty($existing->{$column->name})))) { continue; }
-			if ( ! empty($column->name) && $column->name !== 'status' && $column->null === 'NO' && $column->default === NULL && ! in_array($column->name, array('description', 'content', 'body', 'notes', 'message'), TRUE))
+			if ( ! $no_required && ! empty($column->name) && $column->name !== 'status' && $column->null === 'NO' && $column->default === NULL && ! in_array($column->name, array('description', 'content', 'body', 'notes', 'message'), TRUE))
 			{
 				$rules[] = array('field' => $column->name, 'label' => $this->column_label($column), 'rules' => 'required');
 			}
