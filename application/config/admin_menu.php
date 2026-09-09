@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * The sidebar partial renders this tree and hides any entry the signed-in user
  * lacks permission for, so adding a back-office module is a one-line change
  * here plus the controller itself.
- *
+ * 
  * Entry shape:
  *   key        unique dot-path, matched against $active_menu for highlighting
  *   label      display text
