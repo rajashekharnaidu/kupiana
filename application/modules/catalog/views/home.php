@@ -26,13 +26,13 @@
 			<div class="carousel-item<?php echo $i === 0 ? ' active' : ''; ?>">
 				<div class="hero-slide">
 					<picture>
-						<?php if ($banner->mobile_image): ?><source media="(max-width: 767.98px)" srcset="<?php echo upload_url($banner->mobile_image); ?>"><?php endif; ?>
+						<?php if (trim((string) $banner->mobile_image) !== ''): ?><source media="(max-width: 767.98px)" srcset="<?php echo upload_url($banner->mobile_image); ?>"><?php endif; ?>
 						<img src="<?php echo upload_url($banner->image); ?>" alt="<?php echo html_escape($banner->title); ?>" loading="<?php echo $i === 0 ? 'eager' : 'lazy'; ?>"<?php echo $i === 0 ? ' fetchpriority="high"' : ''; ?>>
 					</picture>
 					<div class="hero-slide-content">
-						<h1 class="fw-bold mb-2"><?php echo html_escape($banner->title); ?></h1>
-						<?php if ($banner->subtitle): ?><p class="lead mb-3"><?php echo html_escape($banner->subtitle); ?></p><?php endif; ?>
-						<?php if ($banner->link_url): ?><a href="<?php echo site_url($banner->link_url); ?>" class="btn btn-primary btn-lg"><?php echo html_escape($banner->button_text ?: 'Shop Now'); ?></a><?php endif; ?>
+						<?php if (trim((string) $banner->title) !== ''): ?><h1 class="fw-bold mb-2"><?php echo html_escape($banner->title); ?></h1><?php endif; ?>
+						<?php if (trim((string) $banner->subtitle) !== ''): ?><p class="lead mb-3"><?php echo html_escape($banner->subtitle); ?></p><?php endif; ?>
+						<?php if (trim((string) $banner->link_url) !== ''): ?><a href="<?php echo site_url($banner->link_url); ?>" class="btn btn-primary btn-lg"><?php echo html_escape(trim((string) $banner->button_text) !== '' ? $banner->button_text : 'Shop Now'); ?></a><?php endif; ?>
 					</div>
 				</div>
 			</div>
