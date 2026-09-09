@@ -64,7 +64,9 @@ $phone = $current_user && $current_user->phone ? $current_user->phone : ($addres
 			<div class="card sticky-top" style="top: 1rem;"><div class="card-body">
 				<h2 class="h5 mb-3">Order Summary</h2>
 				<?php foreach ($items as $item): ?><div class="d-flex justify-content-between gap-3 border-bottom py-2"><div><div class="fw-semibold"><?php echo html_escape($item->name); ?></div><div class="small text-muted">Qty <?php echo (int) $item->quantity; ?></div></div><span><?php echo money($item->unit_price * $item->quantity); ?></span></div><?php endforeach; ?>
+				<?php if ($totals['coupon']): ?><div class="d-flex justify-content-between align-items-center mt-3"><span class="badge badge-soft badge-soft-success"><i class="fa-solid fa-tag me-1"></i><?php echo html_escape($totals['coupon']->code); ?></span><a class="small text-danger" href="<?php echo site_url('cart/remove-coupon'); ?>">Remove</a></div><?php endif; ?>
 				<div class="d-flex justify-content-between mt-3 mb-2"><span>Subtotal</span><span><?php echo money($totals['subtotal']); ?></span></div>
+				<?php if ($totals['discount'] > 0): ?><div class="d-flex justify-content-between mb-2 text-success"><span>Discount</span><span>-<?php echo money($totals['discount']); ?></span></div><?php endif; ?>
 				<hr><div class="d-flex justify-content-between h5"><span>Payable</span><span><?php echo money($totals['total']); ?></span></div>
 				<button class="btn btn-primary w-100 mt-3" type="submit"><i class="fa-solid fa-bag-shopping me-2"></i>Place Order</button>
 			</div></div>

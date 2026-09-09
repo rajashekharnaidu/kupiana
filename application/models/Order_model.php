@@ -42,6 +42,33 @@ class Order_model extends CI_Model
 		$name = trim((string) array_get($input, 'first_name').' '.(string) array_get($input, 'last_name'));
 		$address = $this->address_snapshot($input);
 
+		// Re-validate the cart's coupon here (not just at cart/checkout display
+		// time) so a coupon that expired, hit its usage limit, or stopped
+		// applying to the final cart contents can't slip through.
+		$coupon = NULL;
+		$discount = 0.0;
+		if ($cart->coupon_id)
+		{
+			$this->load->model('Coupon_model', 'coupons');
+			$coupon = $this->coupons->find($cart->coupon_id);
+			$result = $coupon ? $this->coupons->evaluate($coupon, array(
+				'user_id' => $user_id,
+				'email' => array_get($input, 'email'),
+				'items' => $items,
+				'subtotal' => $totals['subtotal'],
+			)) : array('success' => FALSE, 'message' => 'Coupon is no longer available.');
+
+			if ( ! $result['success']) { return $this->fail($result['message']); }
+
+			$discount = $result['discount'];
+			if ($result['free_shipping'] && $shipping > 0)
+			{
+				$totals['total'] -= $shipping;
+				$shipping = 0.0;
+			}
+		}
+		$totals['total'] = round(max(0, $totals['total'] - $discount), 2);
+
 		$this->db->trans_begin();
 		$this->db->insert('orders', array(
 			'order_number' => generate_code('ORD'),
@@ -53,9 +80,9 @@ class Order_model extends CI_Model
 			'billing_address' => json_encode($address),
 			'shipping_address' => json_encode($address),
 			'subtotal' => $totals['subtotal'],
-			'discount_amount' => 0,
-			'coupon_id' => NULL,
-			'coupon_code' => NULL,
+			'discount_amount' => $discount,
+			'coupon_id' => $coupon ? $coupon->id : NULL,
+			'coupon_code' => $coupon ? $coupon->code : NULL,
 			'tax_amount' => $totals['tax'],
 			'cgst_amount' => $totals['cgst'],
 			'sgst_amount' => $totals['sgst'],
@@ -111,8 +138,11 @@ class Order_model extends CI_Model
 			$this->db->where('id', (int) $item->product_id)->set('sold_count', 'sold_count + '.(int) $item->quantity, FALSE)->update('products');
 		}
 
+		if ($coupon) { $this->coupons->record_usage($coupon->id, $user_id, $order_id, $discount); }
+
 		$this->history($order_id, NULL, 'pending', 'Order placed from checkout.');
 		$this->db->where('cart_id', (int) $cart->id)->where('deleted_at IS NULL', NULL, FALSE)->update('cart_items', array('deleted_at' => $now, 'updated_at' => $now));
+		$this->db->where('id', (int) $cart->id)->update('carts', array('coupon_id' => NULL, 'updated_at' => $now));
 
 		if ($this->db->trans_status() === FALSE)
 		{

@@ -129,10 +129,7 @@ class Checkout extends Store_Controller
 	 */
 	protected function totals(array $items)
 	{
-		$subtotal = 0;
-		foreach ($items as $item) { $subtotal += (float) $item->unit_price * (int) $item->quantity; }
-		$shipping = 0;
-		return array('subtotal' => $subtotal, 'shipping' => $shipping, 'total' => $subtotal);
+		return $this->cart_totals($items);
 	}
 
 	/**

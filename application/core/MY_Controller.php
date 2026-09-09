@@ -425,6 +425,65 @@ class Store_Controller extends MY_Controller
 			'session_id' => session_id(),
 		);
 	}
+
+	/**
+	 * Coupon currently applied to this identity's cart, re-validated against
+	 * the live cart contents. A coupon that no longer qualifies (expired,
+	 * usage limit reached, items changed, ...) is silently detached from the
+	 * cart and a flash message explains why.
+	 *
+	 * @param  object[] $items
+	 * @param  float    $subtotal
+	 * @return object|null
+	 */
+	protected function applied_coupon(array $items, $subtotal)
+	{
+		$cart = $this->store->cart($this->cart_identity(), FALSE);
+		if ( ! $cart || ! $cart->coupon_id) { return NULL; }
+
+		$this->load->model('Coupon_model', 'coupons');
+		$coupon = $this->coupons->find($cart->coupon_id);
+		$result = $coupon ? $this->coupons->evaluate($coupon, array(
+			'user_id' => $this->auth->check() ? (int) $this->auth->id() : NULL,
+			'items' => $items,
+			'subtotal' => $subtotal,
+		)) : array('success' => FALSE, 'message' => 'Coupon is no longer available.');
+
+		if ( ! $result['success'])
+		{
+			$this->db->where('id', $cart->id)->update('carts', array('coupon_id' => NULL, 'updated_at' => date('Y-m-d H:i:s')));
+			$this->session->set_flashdata('error', $result['message']);
+			return NULL;
+		}
+
+		$coupon->discount_amount = $result['discount'];
+		$coupon->free_shipping = $result['free_shipping'];
+		return $coupon;
+	}
+
+	/**
+	 * Cart totals including the discount from any currently-applied coupon.
+	 *
+	 * @param  object[] $items
+	 * @return array {subtotal, discount, shipping, total, coupon}
+	 */
+	protected function cart_totals(array $items)
+	{
+		$subtotal = 0;
+		foreach ($items as $item) { $subtotal += (float) $item->unit_price * (int) $item->quantity; }
+
+		$coupon = $this->applied_coupon($items, $subtotal);
+		$discount = $coupon ? (float) $coupon->discount_amount : 0.0;
+		$shipping = 0.0;
+
+		return array(
+			'subtotal' => $subtotal,
+			'discount' => $discount,
+			'shipping' => $shipping,
+			'total' => max(0, $subtotal - $discount + $shipping),
+			'coupon' => $coupon,
+		);
+	}
 }
 
 /**

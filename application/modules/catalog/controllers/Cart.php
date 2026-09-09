@@ -57,11 +57,58 @@ class Cart extends Store_Controller
 		redirect('cart');
 	}
 
+	public function apply_coupon()
+	{
+		$code = trim((string) $this->input->post('code', TRUE));
+		$this->load->model('Store_model', 'store');
+		$this->load->model('Coupon_model', 'coupons');
+		$identity = $this->cart_identity();
+		$cart = $this->store->cart($identity, FALSE);
+		$items = $this->store->cart_items($identity);
+
+		if ($code === '' || ! $cart || empty($items))
+		{
+			$this->session->set_flashdata('error', 'Add items to your cart before applying a coupon.');
+			redirect('cart');
+		}
+
+		$coupon = $this->coupons->find_by_code($code);
+		if ( ! $coupon)
+		{
+			$this->session->set_flashdata('error', 'Invalid coupon code.');
+			redirect('cart');
+		}
+
+		$subtotal = 0; foreach ($items as $item) { $subtotal += (float) $item->unit_price * (int) $item->quantity; }
+		$result = $this->coupons->evaluate($coupon, array(
+			'user_id' => $this->auth->check() ? (int) $this->auth->id() : NULL,
+			'items' => $items,
+			'subtotal' => $subtotal,
+		));
+
+		if ( ! $result['success'])
+		{
+			$this->session->set_flashdata('error', $result['message']);
+			redirect('cart');
+		}
+
+		$this->db->where('id', $cart->id)->update('carts', array('coupon_id' => $coupon->id, 'updated_at' => date('Y-m-d H:i:s')));
+		$this->session->set_flashdata('success', $result['free_shipping'] ? 'Coupon applied: free shipping.' : 'Coupon applied! You saved '.money($result['discount']).'.');
+		redirect('cart');
+	}
+
+	public function remove_coupon()
+	{
+		$this->load->model('Store_model', 'store');
+		$cart = $this->store->cart($this->cart_identity(), FALSE);
+		if ($cart) { $this->db->where('id', $cart->id)->update('carts', array('coupon_id' => NULL, 'updated_at' => date('Y-m-d H:i:s'))); }
+		$this->session->set_flashdata('success', 'Coupon removed.');
+		redirect('cart');
+	}
+
 	protected function totals(array $items)
 	{
-		$subtotal = 0; foreach ($items as $item) { $subtotal += (float) $item->unit_price * (int) $item->quantity; }
-		$shipping = 0;
-		return array('subtotal' => $subtotal, 'shipping' => $shipping, 'total' => $subtotal);
+		return $this->cart_totals($items);
 	}
 
 	protected function variant_price($variant_id, $fallback)

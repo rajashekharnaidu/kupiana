@@ -23,8 +23,10 @@ class Coupon_model extends MY_Model
 		$code = trim((string) $code);
 		if ($code === '') { return NULL; }
 
+		// coupons.code uses a case-insensitive collation, so a plain match
+		// already ignores case - no need for a raw UPPER() expression.
 		return $this->db->from('coupons')
-			->where('UPPER(code) =', strtoupper($code), FALSE)
+			->where('code', $code)
 			->where('status', 'active')
 			->where('deleted_at IS NULL', NULL, FALSE)
 			->get()->row();
@@ -197,7 +199,7 @@ class Coupon_model extends MY_Model
 			$category_ids = $this->restricted_ids($coupon->id, 'category');
 			$item_product_ids = array_map(function ($item) { return (int) $item->product_id; }, $items);
 			$product_ids = empty($category_ids) || empty($item_product_ids) ? array() : array_map(function ($row) { return (int) $row->product_id; },
-				$this->db->select('DISTINCT product_id')->from('product_categories')
+				$this->db->distinct()->select('product_id')->from('product_categories')
 					->where_in('category_id', $category_ids)->where_in('product_id', $item_product_ids)
 					->where('deleted_at IS NULL', NULL, FALSE)->get()->result()
 			);
