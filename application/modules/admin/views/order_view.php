@@ -76,7 +76,7 @@
 			<div class="card-body">
 				<h6 class="mb-3">Totals</h6>
 				<div class="d-flex justify-content-between mb-2"><span>Subtotal</span><span><?php echo money($order->subtotal); ?></span></div>
-				<div class="d-flex justify-content-between mb-2"><span>Discount</span><span>-<?php echo money($order->discount_amount); ?></span></div>
+				<div class="d-flex justify-content-between mb-2"><span>Discount<?php if ($order->coupon_code): ?> <span class="badge badge-soft badge-soft-success"><i class="fa-solid fa-tag me-1"></i><?php echo html_escape($order->coupon_code); ?></span><?php endif; ?></span><span>-<?php echo money($order->discount_amount); ?></span></div>
 				<div class="d-flex justify-content-between mb-2"><span>Tax</span><span><?php echo money($order->tax_amount); ?></span></div>
 				<div class="d-flex justify-content-between mb-2"><span>Shipping</span><span><?php echo money($order->shipping_amount); ?></span></div>
 				<hr>

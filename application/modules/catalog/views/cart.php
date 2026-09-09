@@ -9,8 +9,18 @@
 				<?php foreach ($items as $item): ?><tr><td><div class="d-flex gap-3 align-items-center"><img src="<?php echo upload_url($item->image_path); ?>" alt="" width="64" height="64" class="rounded border"><div><a class="fw-semibold" href="<?php echo site_url('products/'.$item->slug); ?>"><?php echo html_escape($item->name); ?></a><div class="small text-muted"><?php echo html_escape($item->brand_name ?: $item->sku); ?></div></div></div></td><td class="text-end"><?php echo money($item->unit_price); ?></td><td class="text-end"><input class="form-control form-control-sm ms-auto" style="width:90px" type="number" min="1" name="quantities[<?php echo (int) $item->id; ?>]" value="<?php echo (int) $item->quantity; ?>"></td><td class="text-end fw-semibold"><?php echo money($item->unit_price * $item->quantity); ?></td><td class="text-end"><a class="btn btn-sm btn-outline-danger" href="<?php echo site_url('cart/remove/'.$item->id); ?>" data-confirm="Remove this item?"><i class="fa-solid fa-trash"></i></a></td></tr><?php endforeach; ?>
 			</tbody></table></div><div class="card-footer text-end"><button class="btn btn-primary" type="submit">Update Cart</button></div>
 		</form></div><div class="col-lg-4"><div class="card"><div class="card-body"><h2 class="h5 mb-3">Summary</h2>
-			<?php if ($totals['coupon']): ?>
-			<div class="d-flex justify-content-between align-items-center mb-2"><div><span class="badge badge-soft badge-soft-success"><i class="fa-solid fa-tag me-1"></i><?php echo html_escape($totals['coupon']->code); ?></span></div><a class="small text-danger" href="<?php echo site_url('cart/remove-coupon'); ?>">Remove</a></div>
+			<?php if ($totals['coupon']): $coupon = $totals['coupon']; ?>
+			<div class="border rounded p-3 mb-3 bg-light">
+				<div class="d-flex justify-content-between align-items-start gap-2">
+					<div>
+						<span class="badge badge-soft badge-soft-success mb-1"><i class="fa-solid fa-tag me-1"></i><?php echo html_escape($coupon->code); ?></span>
+						<div class="fw-semibold"><?php echo html_escape($coupon->name); ?></div>
+						<?php if ($coupon->description): ?><div class="small text-muted"><?php echo html_escape($coupon->description); ?></div><?php endif; ?>
+						<div class="small text-success mt-1"><?php echo $coupon->free_shipping ? 'Free shipping applied' : 'You saved '.money($coupon->discount_amount); ?></div>
+					</div>
+					<a class="small text-danger text-nowrap" href="<?php echo site_url('cart/remove-coupon'); ?>">Remove</a>
+				</div>
+			</div>
 			<?php else: ?>
 			<form method="post" action="<?php echo site_url('cart/apply-coupon'); ?>" class="mb-3">
 				<input type="hidden" name="<?php echo html_escape($this->security->get_csrf_token_name()); ?>" value="<?php echo html_escape($this->security->get_csrf_hash()); ?>">
@@ -18,6 +28,7 @@
 				<div class="input-group"><input class="form-control" type="text" name="code" placeholder="Enter code"><button class="btn btn-outline-primary" type="submit">Apply</button></div>
 			</form>
 			<?php endif; ?>
+			<div class="small text-muted mb-3"><i class="fa-solid fa-circle-info me-1"></i>Coupons are re-checked when you place your order — one that has expired or is no longer eligible will be removed automatically.</div>
 			<div class="d-flex justify-content-between mb-2"><span>Subtotal</span><span><?php echo money($totals['subtotal']); ?></span></div>
 			<?php if ($totals['discount'] > 0): ?><div class="d-flex justify-content-between mb-2 text-success"><span>Discount</span><span>-<?php echo money($totals['discount']); ?></span></div><?php endif; ?>
 			<hr><div class="d-flex justify-content-between h5"><span>Total</span><span><?php echo money($totals['total']); ?></span></div><a class="btn btn-primary w-100 mt-3" href="<?php echo site_url('checkout'); ?>">Checkout</a></div></div></div></div><?php endif; ?>

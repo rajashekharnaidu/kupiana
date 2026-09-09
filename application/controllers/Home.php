@@ -10,7 +10,6 @@ class Home extends Store_Controller
 
 		$this->render('home', array(
 			'banners' => $this->store->banners('home_slider'),
-			'categories' => $this->store->categories(TRUE),
 			'featured' => $this->store->featured(8),
 			'trending' => $this->store->products(array('trending' => 1, 'per_page' => 8)),
 			'brands' => $this->store->brands(8),

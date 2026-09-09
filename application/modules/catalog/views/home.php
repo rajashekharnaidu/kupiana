@@ -13,17 +13,6 @@
 	</div>
 </section>
 
-<section class="py-5">
-	<div class="container">
-		<div class="section-heading"><h2>Shop Categories</h2><a href="<?php echo site_url('shop'); ?>" class="small">View all</a></div>
-		<div class="row g-3">
-			<?php foreach (array_slice($categories, 0, 8) as $category): ?>
-				<div class="col-6 col-md-3"><a class="card h-100 text-center p-3" href="<?php echo site_url('category/'.$category->slug); ?>"><i class="fa-solid fa-layer-group fa-2x text-primary mb-2"></i><strong><?php echo html_escape($category->name); ?></strong><span class="small text-muted"><?php echo (int) $category->product_count; ?> products</span></a></div>
-			<?php endforeach; ?>
-		</div>
-	</div>
-</section>
-
 <section class="py-5 bg-light">
 	<div class="container">
 		<div class="section-heading"><h2>Featured Picks</h2><a href="<?php echo site_url('shop'); ?>" class="small">View all <i class="fa-solid fa-arrow-right ms-1"></i></a></div>
