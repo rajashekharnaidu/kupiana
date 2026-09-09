@@ -116,7 +116,7 @@ class MY_Controller extends CI_Controller
 	 */
 	protected function flash($type, $message)
 	{
-		$this->session->set_flashdata('flash_'.$type, $message);
+		$this->session->set_flashdata($type, $message);
 	}
 
 	/**
@@ -130,7 +130,7 @@ class MY_Controller extends CI_Controller
 
 		foreach (array('success', 'error', 'warning', 'info') as $type)
 		{
-			$message = $this->session->flashdata('flash_'.$type);
+			$message = $this->session->flashdata($type);
 
 			if ( ! empty($message))
 			{
