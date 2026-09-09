@@ -1,4 +1,5 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php if (empty($banners)): ?>
 <section class="py-5 bg-light">
 	<div class="container">
 		<div class="row align-items-center g-4">
@@ -12,6 +13,38 @@
 		</div>
 	</div>
 </section>
+<?php else: ?>
+<section class="hero-slider">
+	<div id="homeBannerCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-touch="true">
+		<?php if (count($banners) > 1): ?>
+		<div class="carousel-indicators">
+			<?php foreach ($banners as $i => $banner): ?><button type="button" data-bs-target="#homeBannerCarousel" data-bs-slide-to="<?php echo $i; ?>" <?php echo $i === 0 ? 'class="active" aria-current="true"' : ''; ?> aria-label="Slide <?php echo $i + 1; ?>"></button><?php endforeach; ?>
+		</div>
+		<?php endif; ?>
+		<div class="carousel-inner">
+			<?php foreach ($banners as $i => $banner): ?>
+			<div class="carousel-item<?php echo $i === 0 ? ' active' : ''; ?>">
+				<div class="hero-slide">
+					<picture>
+						<?php if ($banner->mobile_image): ?><source media="(max-width: 767.98px)" srcset="<?php echo upload_url($banner->mobile_image); ?>"><?php endif; ?>
+						<img src="<?php echo upload_url($banner->image); ?>" alt="<?php echo html_escape($banner->title); ?>" loading="<?php echo $i === 0 ? 'eager' : 'lazy'; ?>"<?php echo $i === 0 ? ' fetchpriority="high"' : ''; ?>>
+					</picture>
+					<div class="hero-slide-content">
+						<h1 class="fw-bold mb-2"><?php echo html_escape($banner->title); ?></h1>
+						<?php if ($banner->subtitle): ?><p class="lead mb-3"><?php echo html_escape($banner->subtitle); ?></p><?php endif; ?>
+						<?php if ($banner->link_url): ?><a href="<?php echo site_url($banner->link_url); ?>" class="btn btn-primary btn-lg"><?php echo html_escape($banner->button_text ?: 'Shop Now'); ?></a><?php endif; ?>
+					</div>
+				</div>
+			</div>
+			<?php endforeach; ?>
+		</div>
+		<?php if (count($banners) > 1): ?>
+		<button class="carousel-control-prev" type="button" data-bs-target="#homeBannerCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span></button>
+		<button class="carousel-control-next" type="button" data-bs-target="#homeBannerCarousel" data-bs-slide="next"><span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span></button>
+		<?php endif; ?>
+	</div>
+</section>
+<?php endif; ?>
 
 <section class="py-5 bg-light">
 	<div class="container">
