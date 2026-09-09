@@ -418,7 +418,7 @@ class Crud extends Admin_Controller
 		{
 			if ( ! $this->is_upload_field($column->name)) { continue; }
 			$upload = $uploader->image($column->name, $directory);
-			if ($upload !== FALSE) { $data[$column->name] = $upload['name']; }
+			if ($upload !== FALSE) { $data[$column->name] = $directory.'/'.$upload['name']; }
 		}
 	}
 
