@@ -55,9 +55,23 @@ class Payments extends Store_Controller
 		log_message('info', 'Gateway: '.$payment->gateway);
 		log_message('info', 'Gateway Order ID: '.($payment->gateway_order_id ?: 'NOT SET'));
 
-		if (empty($payment->gateway_order_id))
+		// An order created while the gateway was in sandbox mode carries a
+		// payment_session_id that Cashfree's production checkout will reject
+		// (and vice versa), so a mode change forces a fresh order rather than
+		// reusing the stale one.
+		$existing_response = $payment->gateway_response ? json_decode($payment->gateway_response, TRUE) : array();
+		$existing_mode = is_array($existing_response) ? array_get($existing_response, '_mode') : NULL;
+		$current_mode = $this->cashfree_gateway->is_sandbox() ? 'sandbox' : 'production';
+		$mode_changed = ! empty($payment->gateway_order_id) && $existing_mode !== NULL && $existing_mode !== $current_mode;
+
+		if ($mode_changed)
 		{
-			log_message('info', '[!] Gateway Order ID not set - creating order in Cashfree');
+			log_message('info', '[!] Cashfree mode changed since order was created ('.$existing_mode.' -> '.$current_mode.') - recreating order');
+		}
+
+		if (empty($payment->gateway_order_id) || $mode_changed)
+		{
+			log_message('info', '[!] Creating order in Cashfree');
 			$created = $this->cashfree_gateway->create_order($order, $payment);
 			log_message('info', 'Create Order Result: '.json_encode($created));
 
@@ -81,6 +95,7 @@ class Payments extends Store_Controller
 
 			log_message('info', 'Cashfree Order ID: '.$gateway_order_id);
 
+			$order_response['_mode'] = $current_mode;
 			$this->payments->attach_gateway_order($payment->id, $gateway_order_id, $order_response);
 			log_message('info', '[✓] Gateway Order ID attached to payment record');
 

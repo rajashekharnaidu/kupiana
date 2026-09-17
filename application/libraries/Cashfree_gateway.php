@@ -21,13 +21,18 @@ class Cashfree_gateway
 		$this->app_id = kupiana_env('CASHFREE_APP_ID');
 		$this->secret_key = kupiana_env('CASHFREE_SECRET_KEY');
 
-		$this->is_sandbox = kupiana_env('CASHFREE_SANDBOX', FALSE);
+		$raw_sandbox_env = kupiana_env('CASHFREE_SANDBOX', FALSE);
+		$this->is_sandbox = filter_var($raw_sandbox_env, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? (bool) $raw_sandbox_env;
 		if (ENVIRONMENT !== 'production')
 		{
 			$this->is_sandbox = TRUE;
 		}
 
 		log_message('info', '========== CASHFREE PAYMENT GATEWAY INITIALIZED ==========');
+		log_message('debug', 'Raw CI_ENV: '.(kupiana_env('CI_ENV') ?: '(not set)'));
+		log_message('debug', 'Resolved ENVIRONMENT constant: '.ENVIRONMENT);
+		log_message('debug', 'Raw CASHFREE_SANDBOX env value: '.var_export($raw_sandbox_env, TRUE));
+		log_message('debug', 'ENVIRONMENT forces sandbox: '.(ENVIRONMENT !== 'production' ? 'YES (ENVIRONMENT !== production)' : 'no'));
 		log_message('info', 'Environment: '.ENVIRONMENT);
 		log_message('info', 'Cashfree Mode: '.($this->is_sandbox ? 'SANDBOX' : 'PRODUCTION'));
 		log_message('info', 'API URL: '.($this->is_sandbox ? $this->sandbox_url : $this->base_url));

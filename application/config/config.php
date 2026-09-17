@@ -311,9 +311,13 @@ $config['allow_get_array'] = TRUE;
 | In development we log at INFO so the Mailer's "not sent" fallback actually
 | writes verification and reset links to application/logs — otherwise there is
 | no way to complete those flows without live ZeptoMail credentials.
-| Production stays at ERROR only.
+| Production stays at ERROR only, unless LOG_THRESHOLD is set in .env (e.g. to
+| temporarily debug the payment flow in production).
 */
-$config['log_threshold'] = (ENVIRONMENT === 'development') ? 3 : 1;
+$_env_log_threshold = kupiana_env('LOG_THRESHOLD', NULL);
+$config['log_threshold'] = ($_env_log_threshold !== NULL && $_env_log_threshold !== '')
+	? (int) $_env_log_threshold
+	: ((ENVIRONMENT === 'development') ? 3 : 1);
 
 /*
 |--------------------------------------------------------------------------
